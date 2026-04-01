@@ -1,0 +1,24 @@
+{
+  "name": "@xmpp/mcp-server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --import tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "@xmpp/config": "workspace:*",
+    "@xmpp/http-interceptor": "workspace:*",
+    "@xmpp/router": "workspace:*",
+    "@xmpp/types": "workspace:*",
+    "@xmpp/wallet": "workspace:*",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0"
+  }
+}

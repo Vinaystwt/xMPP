@@ -1,0 +1,24 @@
+{
+  "name": "@xmpp/facilitator",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --import tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@x402/core": "^2.8.0",
+    "@x402/stellar": "^2.8.0",
+    "@xmpp/config": "workspace:*",
+    "@xmpp/logger": "workspace:*",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "tsx": "^4.21.0"
+  }
+}

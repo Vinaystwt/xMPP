@@ -1,0 +1,28 @@
+{
+  "name": "@xmpp/gateway",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --import tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@xmpp/config": "workspace:*",
+    "@xmpp/http-interceptor": "workspace:*",
+    "@xmpp/logger": "workspace:*",
+    "@xmpp/policy-engine": "workspace:*",
+    "@xmpp/router": "workspace:*",
+    "@xmpp/types": "workspace:*",
+    "@xmpp/wallet": "workspace:*",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0",
+    "pino-http": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "tsx": "^4.21.0"
+  }
+}

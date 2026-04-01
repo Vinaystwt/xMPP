@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022", "DOM"],
+    "baseUrl": ".",
+    "paths": {
+      "@xmpp/config": ["packages/config/src/index.ts"],
+      "@xmpp/types": ["packages/types/src/index.ts"],
+      "@xmpp/logger": ["packages/logger/src/index.ts"],
+      "@xmpp/router": ["packages/router/src/index.ts"],
+      "@xmpp/http-interceptor": ["packages/http-interceptor/src/index.ts"],
+      "@xmpp/payment-adapters": ["packages/payment-adapters/src/index.ts"],
+      "@xmpp/wallet": ["packages/wallet/src/index.ts"],
+      "@xmpp/policy-engine": ["packages/policy-engine/src/index.ts"]
+    },
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "outDir": "dist",
+    "types": ["node"]
+  }
+}

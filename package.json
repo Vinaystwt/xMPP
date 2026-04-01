@@ -1,0 +1,38 @@
+{
+  "name": "xmpp",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "description": "xMPP: the ultimate x402 ↔ MPP brain for autonomous agents on Stellar.",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22.18.0",
+    "pnpm": ">=10.33.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "check": "pnpm lint && pnpm typecheck && pnpm test",
+    "xmpp:gateway": "pnpm --filter @xmpp/gateway dev",
+    "xmpp:facilitator": "pnpm --filter @xmpp/facilitator dev",
+    "xmpp:mcp": "pnpm --filter @xmpp/mcp-server dev",
+    "xmpp:dashboard": "pnpm --filter @xmpp/dashboard dev",
+    "xmpp:services": "pnpm --filter @xmpp/demo-services dev",
+    "xmpp:smoke": "pnpm exec tsx scripts/live-smoke.ts",
+    "xmpp:test": "pnpm check"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^24.5.2",
+    "eslint": "^10.1.0",
+    "prettier": "^3.8.1",
+    "tsx": "^4.21.0",
+    "turbo": "^2.8.12",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.57.2",
+    "vitest": "^4.1.2"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "@xmpp/demo-services",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --import tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@stellar/mpp": "^0.3.0",
+    "@stellar/stellar-sdk": "^14.6.1",
+    "@x402/core": "^2.8.0",
+    "@x402/express": "^2.8.0",
+    "@x402/stellar": "^2.8.0",
+    "@xmpp/config": "workspace:*",
+    "@xmpp/payment-adapters": "workspace:*",
+    "express": "^5.2.1",
+    "mppx": "^0.4.11"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "tsx": "^4.21.0"
+  }
+}
