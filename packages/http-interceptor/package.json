@@ -1,9 +1,20 @@
 {
   "name": "@xmpp/http-interceptor",
-  "private": true,
+  "version": "0.1.0",
   "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "dist/http-interceptor/src/index.js",
+  "types": "dist/http-interceptor/src/index.d.ts",
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/http-interceptor/src/index.d.ts",
+      "import": "./dist/http-interceptor/src/index.js",
+      "default": "./dist/http-interceptor/src/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
@@ -13,9 +24,11 @@
   },
   "dependencies": {
     "@xmpp/config": "workspace:*",
+    "@xmpp/contract-runtime": "workspace:*",
     "@xmpp/payment-adapters": "workspace:*",
     "@xmpp/policy-engine": "workspace:*",
     "@xmpp/router": "workspace:*",
-    "@xmpp/types": "workspace:*"
+    "@xmpp/types": "workspace:*",
+    "@xmpp/wallet": "workspace:*"
   }
 }

@@ -7,13 +7,17 @@
     "baseUrl": ".",
     "paths": {
       "@xmpp/config": ["packages/config/src/index.ts"],
+      "@xmpp/core": ["packages/core/src/index.ts"],
+      "@xmpp/core/local": ["packages/core/src/local.ts"],
       "@xmpp/types": ["packages/types/src/index.ts"],
       "@xmpp/logger": ["packages/logger/src/index.ts"],
+      "@xmpp/contract-runtime": ["packages/contract-runtime/src/index.ts"],
       "@xmpp/router": ["packages/router/src/index.ts"],
       "@xmpp/http-interceptor": ["packages/http-interceptor/src/index.ts"],
       "@xmpp/payment-adapters": ["packages/payment-adapters/src/index.ts"],
       "@xmpp/wallet": ["packages/wallet/src/index.ts"],
-      "@xmpp/policy-engine": ["packages/policy-engine/src/index.ts"]
+      "@xmpp/policy-engine": ["packages/policy-engine/src/index.ts"],
+      "@xmpp/mcp": ["apps/mcp-server/src/server.ts"]
     },
     "strict": true,
     "esModuleInterop": true,

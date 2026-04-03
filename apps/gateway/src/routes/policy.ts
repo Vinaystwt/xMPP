@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from 'express'
 import { createRouter } from '@xmpp/router'
-import { evaluatePolicy } from '@xmpp/policy-engine'
+import { evaluatePolicyForRequest } from '@xmpp/policy-engine'
 
 const router = createRouter()
 
@@ -18,7 +18,11 @@ export function registerPolicyRoutes(app: Express) {
       return res.status(400).json({ error: 'query param "url" is required' })
     }
 
-    const policy = evaluatePolicy(url)
+    const policy = await evaluatePolicyForRequest({
+      url,
+      method,
+      serviceId,
+    })
     const routePreview = await router.preview({
       url,
       method,

@@ -1,9 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { getXmppMetadata, xmppFetch } from './index.js'
+import { getXmppMetadata, resetXmppOperatorState, xmppFetch } from './index.js'
 
 describe('xmppFetch', () => {
   afterEach(() => {
     vi.restoreAllMocks()
+    resetXmppOperatorState()
   })
 
   it('retries after a 402 payment challenge', async () => {
@@ -83,6 +84,24 @@ describe('xmppFetch', () => {
     expect(body.error).toContain('policy denied')
     expect(metadata?.policy?.allowed).toBe(false)
     expect(metadata?.policy?.code).toBe('blocked-path')
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('blocks an agent from spending against a disallowed service', async () => {
+    process.env.XMPP_PAYMENT_EXECUTION_MODE = 'mock'
+    const fetchMock = vi.spyOn(globalThis, 'fetch')
+
+    const response = await xmppFetch('http://localhost:4102/quote?symbol=XLM', undefined, {
+      agentId: 'research-agent',
+      serviceId: 'market-api',
+      projectedRequests: 1,
+    })
+    const metadata = getXmppMetadata(response)
+    const body = await response.json()
+
+    expect(response.status).toBe(403)
+    expect(body.error).toContain('agent policy denied')
+    expect(metadata?.policy?.code).toBe('blocked-agent')
     expect(fetchMock).not.toHaveBeenCalled()
   })
 })

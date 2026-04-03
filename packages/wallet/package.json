@@ -1,9 +1,22 @@
 {
   "name": "@xmpp/wallet",
-  "private": true,
+  "version": "0.1.0",
   "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "dist/wallet/src/index.js",
+  "types": "dist/wallet/src/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/wallet/src/index.d.ts",
+      "import": "./dist/wallet/src/index.js",
+      "default": "./dist/wallet/src/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
@@ -12,6 +25,9 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@xmpp/config": "workspace:*"
+    "@stellar/stellar-sdk": "^14.6.1",
+    "@xmpp/config": "workspace:*",
+    "@xmpp/types": "workspace:*",
+    "smart-account-kit": "0.2.10"
   }
 }

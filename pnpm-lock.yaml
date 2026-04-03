@@ -11,6 +11,9 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.1.0)
+      '@stellar/stellar-sdk':
+        specifier: ^15.0.1
+        version: 15.0.1
       '@types/node':
         specifier: ^24.5.2
         version: 24.12.0
@@ -122,6 +125,9 @@ importers:
       '@xmpp/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@xmpp/contract-runtime':
+        specifier: workspace:*
+        version: link:../../packages/contract-runtime
       '@xmpp/http-interceptor':
         specifier: workspace:*
         version: link:../../packages/http-interceptor
@@ -165,6 +171,9 @@ importers:
       '@xmpp/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@xmpp/contract-runtime':
+        specifier: workspace:*
+        version: link:../../packages/contract-runtime
       '@xmpp/http-interceptor':
         specifier: workspace:*
         version: link:../../packages/http-interceptor
@@ -194,11 +203,44 @@ importers:
         specifier: ^4.3.6
         version: 4.3.6
 
+  packages/contract-runtime:
+    dependencies:
+      '@stellar/stellar-sdk':
+        specifier: ^15.0.1
+        version: 15.0.1
+      '@xmpp/config':
+        specifier: workspace:*
+        version: link:../config
+      '@xmpp/logger':
+        specifier: workspace:*
+        version: link:../logger
+      '@xmpp/types':
+        specifier: workspace:*
+        version: link:../types
+
+  packages/core:
+    dependencies:
+      '@stellar/stellar-sdk':
+        specifier: ^15.0.1
+        version: 15.0.1
+      '@xmpp/http-interceptor':
+        specifier: workspace:*
+        version: link:../http-interceptor
+      '@xmpp/router':
+        specifier: workspace:*
+        version: link:../router
+      '@xmpp/types':
+        specifier: workspace:*
+        version: link:../types
+
   packages/http-interceptor:
     dependencies:
       '@xmpp/config':
         specifier: workspace:*
         version: link:../config
+      '@xmpp/contract-runtime':
+        specifier: workspace:*
+        version: link:../contract-runtime
       '@xmpp/payment-adapters':
         specifier: workspace:*
         version: link:../payment-adapters
@@ -211,6 +253,9 @@ importers:
       '@xmpp/types':
         specifier: workspace:*
         version: link:../types
+      '@xmpp/wallet':
+        specifier: workspace:*
+        version: link:../wallet
 
   packages/logger:
     dependencies:
@@ -241,11 +286,21 @@ importers:
       '@xmpp/types':
         specifier: workspace:*
         version: link:../types
+      '@xmpp/wallet':
+        specifier: workspace:*
+        version: link:../wallet
       mppx:
         specifier: ^0.4.11
         version: 0.4.12(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(express@5.2.1)(hono@4.12.9)(openapi-types@12.1.3)(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
 
-  packages/policy-engine: {}
+  packages/policy-engine:
+    dependencies:
+      '@xmpp/contract-runtime':
+        specifier: workspace:*
+        version: link:../contract-runtime
+      '@xmpp/types':
+        specifier: workspace:*
+        version: link:../types
 
   packages/router:
     dependencies:
@@ -257,9 +312,18 @@ importers:
 
   packages/wallet:
     dependencies:
+      '@stellar/stellar-sdk':
+        specifier: ^14.6.1
+        version: 14.6.1
       '@xmpp/config':
         specifier: workspace:*
         version: link:../config
+      '@xmpp/types':
+        specifier: workspace:*
+        version: link:../types
+      smart-account-kit:
+        specifier: 0.2.10
+        version: 0.2.10(@stellar/stellar-sdk@14.6.1)
 
 packages:
 
@@ -697,6 +761,9 @@ packages:
   '@scure/bip39@1.6.0':
     resolution: {integrity: sha512-+lF0BbLiJNwVlev4eKelw1WWLaiKXw7sSl8T6FvBlWkdX+94aGJ4o8XjUdlyhTCjd8c+B3KT3JfS8P0bLRNU6A==}
 
+  '@simplewebauthn/browser@13.3.0':
+    resolution: {integrity: sha512-BE/UWv6FOToAdVk0EokzkqQQDOWtNydYlY6+OrmiZ5SCNmb41VehttboTetUM3T/fr6EAFYVXjz4My2wg230rQ==}
+
   '@spruceid/siwe-parser@2.1.2':
     resolution: {integrity: sha512-d/r3S1LwJyMaRAKQ0awmo9whfXeE88Qt00vRj91q5uv5ATtWIQEGJ67Yr5eSZw5zp1/fZCXZYuEckt8lSkereQ==}
 
@@ -718,6 +785,10 @@ packages:
   '@stellar/js-xdr@3.1.2':
     resolution: {integrity: sha512-VVolPL5goVEIsvuGqDc5uiKxV03lzfWdvYg1KikvwheDmTBO68CKDji3bAZ/kppZrx5iTA8z3Ld5yuytcvhvOQ==}
 
+  '@stellar/js-xdr@4.0.0':
+    resolution: {integrity: sha512-+NmNa7Tk5BI5XFdy/6xGTqAN4J9a9KgCrCGhj2uEUTCBhLkch0M+QbKzNH8zEnejWe0p8w+0q5hUVX6L3OzoVA==}
+    engines: {node: '>=20.0.0', pnpm: '>=9.0.0'}
+
   '@stellar/mpp@0.3.0':
     resolution: {integrity: sha512-ScFI5Zx4nOhR5JEHI2RdxNZuRXhaDePH9Bn7mzQJPFagS/lzgmnUad3POHNubwQJksTU7n0/6pxwMZ34gpOngQ==}
     engines: {node: '>=20'}
@@ -729,8 +800,17 @@ packages:
     resolution: {integrity: sha512-A8kFli6QGy22SRF45IjgPAJfUNGjnI+R7g4DF5NZYVsD1kGf7B4ITyc4OPclLV9tqNI4/lXxafGEw0JEUbHixw==}
     engines: {node: '>=20.0.0'}
 
+  '@stellar/stellar-base@15.0.0':
+    resolution: {integrity: sha512-XQhxUr9BYiEcFcgc4oWcCMR9QJCny/GmmGsuwPKf/ieIcOeb5149KLHYx9mJCA0ea8QbucR2/GzV58QbXOTxQA==}
+    engines: {node: '>=20.0.0'}
+
   '@stellar/stellar-sdk@14.6.1':
     resolution: {integrity: sha512-A1rQWDLdUasXkMXnYSuhgep+3ZZzyuXJKdt5/KAIc0gkmSp906HTvUpbT4pu+bVr41tu0+J4Ugz9J4BQAGGytg==}
+    engines: {node: '>=20.0.0'}
+    hasBin: true
+
+  '@stellar/stellar-sdk@15.0.1':
+    resolution: {integrity: sha512-iZjWKXtfohsPh+CX9wRyQNIlXLeA9VyuQB6UMC7AFBD9XnR92eOjnlfeONzk/Bsrkk6+UPlpzSy2MuF+ydHP1A==}
     engines: {node: '>=20.0.0'}
     hasBin: true
 
@@ -1011,6 +1091,10 @@ packages:
 
   base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
+
+  base64url@3.0.1:
+    resolution: {integrity: sha512-ir1UPr3dkwexU7FdV8qBBbNDRUhMmIekYMFZfi+C/sLNnRESKPl23nB9b2pltqfOQNnGzsDdId90AEtG5tCx4A==}
+    engines: {node: '>=6.0.0'}
 
   bignumber.js@9.3.1:
     resolution: {integrity: sha512-Ko0uX15oIUS7wJ3Rb30Fs6SkVbLmPBAKdlm7q9+ak9bbIeFf0MwuBsQV6z7+X768/cHsfg+WlysDWJcmthjsjQ==}
@@ -1853,6 +1937,21 @@ packages:
     peerDependencies:
       ethers: ^5.6.8 || ^6.0.8
 
+  smart-account-kit-bindings@0.1.2:
+    resolution: {integrity: sha512-2P9IBk/KPutkkVUhTOLvaaRIIaAmJHBCbHUod/0K+zEHLbzQKjL6SSesFK+hO7OPOi2vn4mzZCs6J/vPVXRDCQ==}
+    peerDependencies:
+      '@stellar/stellar-sdk': '>=14.0.0'
+
+  smart-account-kit@0.2.10:
+    resolution: {integrity: sha512-3XmgpmiOUfjBfZjOpDAN8DhniVG+mEHBS0h9m4oVa9eUzUBR6080mzfQvCcYPislsmBzJnFmAc6uTPl2ylD45Q==}
+    engines: {node: '>=22.0.0', pnpm: '>=10.0.0'}
+    peerDependencies:
+      '@creit-tech/stellar-wallets-kit': '>=2.0.0'
+      '@stellar/stellar-sdk': '>=14.0.0'
+    peerDependenciesMeta:
+      '@creit-tech/stellar-wallets-kit':
+        optional: true
+
   sonic-boom@4.2.1:
     resolution: {integrity: sha512-w6AxtubXa2wTXAUsZMMWERrsIRAdrK0Sc+FUytWvYAhBJLyuI4llrMIC1DtlNSdI99EI86KZum2MMq3EAZlF9Q==}
 
@@ -2443,6 +2542,8 @@ snapshots:
       '@noble/hashes': 1.8.0
       '@scure/base': 1.2.6
 
+  '@simplewebauthn/browser@13.3.0': {}
+
   '@spruceid/siwe-parser@2.1.2':
     dependencies:
       '@noble/hashes': 1.8.0
@@ -2467,6 +2568,8 @@ snapshots:
 
   '@stellar/js-xdr@3.1.2': {}
 
+  '@stellar/js-xdr@4.0.0': {}
+
   '@stellar/mpp@0.3.0(@stellar/stellar-sdk@14.6.1)(mppx@0.4.12(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(express@5.2.1)(hono@4.12.9)(openapi-types@12.1.3)(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))':
     dependencies:
       '@stellar/stellar-sdk': 14.6.1
@@ -2482,9 +2585,32 @@ snapshots:
       buffer: 6.0.3
       sha.js: 2.4.12
 
+  '@stellar/stellar-base@15.0.0':
+    dependencies:
+      '@noble/curves': 1.9.7
+      '@stellar/js-xdr': 4.0.0
+      base32.js: 0.1.0
+      bignumber.js: 9.3.1
+      buffer: 6.0.3
+      sha.js: 2.4.12
+
   '@stellar/stellar-sdk@14.6.1':
     dependencies:
       '@stellar/stellar-base': 14.1.0
+      axios: 1.14.0
+      bignumber.js: 9.3.1
+      commander: 14.0.3
+      eventsource: 2.0.2
+      feaxios: 0.0.23
+      randombytes: 2.1.0
+      toml: 3.0.0
+      urijs: 1.19.11
+    transitivePeerDependencies:
+      - debug
+
+  '@stellar/stellar-sdk@15.0.1':
+    dependencies:
+      '@stellar/stellar-base': 15.0.0
       axios: 1.14.0
       bignumber.js: 9.3.1
       commander: 14.0.3
@@ -2834,6 +2960,8 @@ snapshots:
   base32.js@0.1.0: {}
 
   base64-js@1.5.1: {}
+
+  base64url@3.0.1: {}
 
   bignumber.js@9.3.1: {}
 
@@ -3734,6 +3862,18 @@ snapshots:
       ethers: 6.16.0
       uri-js: 4.4.1
       valid-url: 1.0.9
+
+  smart-account-kit-bindings@0.1.2(@stellar/stellar-sdk@14.6.1):
+    dependencies:
+      '@stellar/stellar-sdk': 14.6.1
+      buffer: 6.0.3
+
+  smart-account-kit@0.2.10(@stellar/stellar-sdk@14.6.1):
+    dependencies:
+      '@simplewebauthn/browser': 13.3.0
+      '@stellar/stellar-sdk': 14.6.1
+      base64url: 3.0.1
+      smart-account-kit-bindings: 0.1.2(@stellar/stellar-sdk@14.6.1)
 
   sonic-boom@4.2.1:
     dependencies:

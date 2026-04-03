@@ -1,7 +1,28 @@
 {
-  "name": "@xmpp/mcp-server",
-  "private": true,
+  "name": "@xmpp/mcp",
+  "version": "0.1.0",
   "type": "module",
+  "main": "dist/apps/mcp-server/src/server.js",
+  "types": "dist/apps/mcp-server/src/server.d.ts",
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/apps/mcp-server/src/server.d.ts",
+      "import": "./dist/apps/mcp-server/src/server.js",
+      "default": "./dist/apps/mcp-server/src/server.js"
+    },
+    "./cli": {
+      "types": "./dist/apps/mcp-server/src/index.d.ts",
+      "import": "./dist/apps/mcp-server/src/index.js",
+      "default": "./dist/apps/mcp-server/src/index.js"
+    }
+  },
+  "bin": {
+    "xmpp-mcp": "dist/apps/mcp-server/src/index.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "node --import tsx src/index.ts",
     "build": "tsc -p tsconfig.json",
@@ -12,6 +33,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.27.1",
     "@xmpp/config": "workspace:*",
+    "@xmpp/contract-runtime": "workspace:*",
     "@xmpp/http-interceptor": "workspace:*",
     "@xmpp/router": "workspace:*",
     "@xmpp/types": "workspace:*",

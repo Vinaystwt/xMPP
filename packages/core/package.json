@@ -1,0 +1,51 @@
+{
+  "name": "@xmpp/core",
+  "version": "0.1.0",
+  "description": "Installable xMPP SDK with gateway client, route planning, and local Stellar payment routing helpers.",
+  "type": "module",
+  "main": "dist/core/src/index.js",
+  "types": "dist/core/src/index.d.ts",
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/core/src/index.d.ts",
+      "import": "./dist/core/src/index.js",
+      "default": "./dist/core/src/index.js"
+    },
+    "./local": {
+      "types": "./dist/core/src/local.d.ts",
+      "import": "./dist/core/src/local.js",
+      "default": "./dist/core/src/local.js"
+    },
+    "./gateway-client": {
+      "types": "./dist/core/src/gateway-client.d.ts",
+      "import": "./dist/core/src/gateway-client.js",
+      "default": "./dist/core/src/gateway-client.js"
+    },
+    "./cli": {
+      "types": "./dist/core/src/cli.d.ts",
+      "import": "./dist/core/src/cli.js",
+      "default": "./dist/core/src/cli.js"
+    }
+  },
+  "bin": {
+    "xmpp-core": "dist/core/src/cli.js",
+    "xmpp-demo": "dist/core/src/cli.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "lint": "eslint src",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@stellar/stellar-sdk": "^15.0.1",
+    "@xmpp/http-interceptor": "workspace:*",
+    "@xmpp/router": "workspace:*",
+    "@xmpp/types": "workspace:*"
+  }
+}

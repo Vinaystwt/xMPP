@@ -18,7 +18,11 @@ export function registerFetchRoute(app: Express) {
 
       const response = await xmppFetch(
         url,
-        { method, headers, body: body ? JSON.stringify(body) : undefined },
+        {
+          method,
+          headers,
+          body: typeof body === 'string' ? body : body ? JSON.stringify(body) : undefined,
+        },
         options,
       )
 

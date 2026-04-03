@@ -1,0 +1,31 @@
+{
+  "name": "@xmpp/contract-runtime",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/contract-runtime/src/index.js",
+  "types": "dist/contract-runtime/src/index.d.ts",
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/contract-runtime/src/index.d.ts",
+      "import": "./dist/contract-runtime/src/index.js",
+      "default": "./dist/contract-runtime/src/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "lint": "eslint src",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@stellar/stellar-sdk": "^15.0.1",
+    "@xmpp/config": "workspace:*",
+    "@xmpp/logger": "workspace:*",
+    "@xmpp/types": "workspace:*"
+  }
+}

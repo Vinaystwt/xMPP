@@ -6,6 +6,8 @@ import { logger } from '@xmpp/logger'
 import { registerHealthRoute } from './routes/health.js'
 import { registerFetchRoute } from './routes/fetch.js'
 import { registerPolicyRoutes } from './routes/policy.js'
+import { registerReceiptRoutes } from './routes/receipts.js'
+import { registerStateRoutes } from './routes/state.js'
 import { registerWalletRoute } from './routes/wallet.js'
 
 const pinoHttp = (pinoHttpModule as unknown as typeof import('pino-http').default)
@@ -18,6 +20,8 @@ export function createGatewayApp(): Express {
 
   registerHealthRoute(app)
   registerWalletRoute(app)
+  registerStateRoutes(app)
+  registerReceiptRoutes(app)
   registerPolicyRoutes(app)
   registerFetchRoute(app)
 

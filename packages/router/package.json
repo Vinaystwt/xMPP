@@ -1,9 +1,20 @@
 {
   "name": "@xmpp/router",
-  "private": true,
+  "version": "0.1.0",
   "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "dist/router/src/index.js",
+  "types": "dist/router/src/index.d.ts",
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/router/src/index.d.ts",
+      "import": "./dist/router/src/index.js",
+      "default": "./dist/router/src/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",

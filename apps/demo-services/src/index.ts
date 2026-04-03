@@ -13,6 +13,53 @@ import { Keypair } from '@stellar/stellar-sdk'
 import { XLM_SAC_TESTNET } from '@xmpp/payment-adapters'
 
 const stellarNetwork = config.network as 'stellar:testnet' | 'stellar:pubnet'
+type FeePayerConfig = ReturnType<typeof buildFeePayer>
+
+function buildFeePayer(kind: 'charge' | 'session') {
+  const enabled =
+    kind === 'charge' ? config.mpp.feeSponsorship.chargeEnabled : config.mpp.feeSponsorship.sessionEnabled
+
+  if (!enabled) {
+    return undefined
+  }
+
+  const envelopeSigner = config.mpp.feeSponsorSecretKey ?? config.mpp.secretKey
+  if (!envelopeSigner) {
+    return undefined
+  }
+
+  return {
+    envelopeSigner,
+    feeBumpSigner: config.mpp.feeBumpSecretKey,
+  }
+}
+
+function buildFeeSponsorshipMeta(feePayer?: FeePayerConfig) {
+  const sponsorPublicKey = feePayer ? Keypair.fromSecret(feePayer.envelopeSigner).publicKey() : null
+  const feeBumpPublicKey =
+    feePayer?.feeBumpSigner ? Keypair.fromSecret(feePayer.feeBumpSigner).publicKey() : null
+
+  return {
+    feeSponsored: Boolean(feePayer),
+    feeSponsorPublicKey: sponsorPublicKey,
+    feeBumpPublicKey,
+    gasModel: feePayer ? 'service-sponsored' : 'agent-funded',
+  }
+}
+
+function buildExecutionHeaders(feePayer?: FeePayerConfig) {
+  const headers = new Headers()
+  const meta = buildFeeSponsorshipMeta(feePayer)
+  headers.set('x-xmpp-fee-sponsored', String(meta.feeSponsored))
+  if (meta.feeSponsorPublicKey) {
+    headers.set('x-xmpp-fee-sponsor', meta.feeSponsorPublicKey)
+  }
+  if (meta.feeBumpPublicKey) {
+    headers.set('x-xmpp-fee-bump-sponsor', meta.feeBumpPublicKey)
+  }
+
+  return headers
+}
 
 function toWebRequest(req: express.Request) {
   const headers = new Headers()
@@ -56,8 +103,33 @@ function createX402FacilitatorClient() {
   })
 }
 
+function registerCapabilityDocument(
+  app: express.Express,
+  document: {
+    serviceId: string
+    paymentModes: string[]
+    preferredAsset: string
+    pricingHints: Record<string, number | string | boolean>
+  },
+) {
+  app.get('/.well-known/xmpp.json', (_req: express.Request, res: express.Response) => {
+    res.json(document)
+  })
+}
+
 export function createResearchApp(): express.Express {
   const app = express()
+  registerCapabilityDocument(app, {
+    serviceId: 'research-api',
+    paymentModes: ['x402'],
+    preferredAsset: XLM_SAC_TESTNET,
+    pricingHints: {
+      perCallUsd: 0.01,
+      breakEvenRequests: 4,
+      preferredSingleCall: 'x402',
+      streamingPreferred: false,
+    },
+  })
   app.use(
     paymentMiddlewareFromConfig(
       {
@@ -94,6 +166,19 @@ export function createResearchApp(): express.Express {
 
 export function createMarketApp(): express.Express {
   const app = express()
+  const feePayer = buildFeePayer('charge')
+  registerCapabilityDocument(app, {
+    serviceId: 'market-api',
+    paymentModes: ['mpp-charge'],
+    preferredAsset: XLM_SAC_TESTNET,
+    pricingHints: {
+      perCallUsd: 0.03,
+      breakEvenRequests: 3,
+      preferredSingleCall: 'mpp-charge',
+      streamingPreferred: false,
+      feeSponsored: Boolean(feePayer),
+    },
+  })
   const payments = MppxCharge.create({
     secretKey: config.mpp.secretKey,
     methods: [
@@ -101,6 +186,7 @@ export function createMarketApp(): express.Express {
         recipient: config.mpp.recipientAddress ?? '',
         currency: XLM_SAC_TESTNET,
         network: stellarNetwork,
+        feePayer,
         store: ChargeStore.memory(),
       }),
     ],
@@ -124,6 +210,10 @@ export function createMarketApp(): express.Express {
           route: req.header('x-xmpp-route') ?? 'mpp-charge',
           symbol: req.query.symbol ?? 'XLM',
           price: '0.1245',
+          payment: buildFeeSponsorshipMeta(feePayer),
+          executionMode: 'live-charge',
+        }, {
+          headers: buildExecutionHeaders(feePayer),
         }),
       ),
     )
@@ -134,6 +224,18 @@ export function createMarketApp(): express.Express {
 
 function createMockStreamApp(): express.Express {
   const app = express()
+  registerCapabilityDocument(app, {
+    serviceId: 'stream-api',
+    paymentModes: ['mpp-session'],
+    preferredAsset: XLM_SAC_TESTNET,
+    pricingHints: {
+      sessionOpenUsd: 0.005,
+      perCallUsd: 0.005,
+      breakEvenRequests: 4,
+      preferredSingleCall: 'x402',
+      streamingPreferred: true,
+    },
+  })
   app.get('/stream/tick', (req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (req.header('x-xmpp-paid') === 'ok') {
       return next()
@@ -164,6 +266,20 @@ function createMockStreamApp(): express.Express {
 
 function createLiveStreamApp(): express.Express {
   const app = express()
+  const feePayer = buildFeePayer('session')
+  registerCapabilityDocument(app, {
+    serviceId: 'stream-api',
+    paymentModes: ['mpp-session'],
+    preferredAsset: XLM_SAC_TESTNET,
+    pricingHints: {
+      sessionOpenUsd: 0.005,
+      perCallUsd: 0.005,
+      breakEvenRequests: 4,
+      preferredSingleCall: 'x402',
+      streamingPreferred: true,
+      feeSponsored: Boolean(feePayer),
+    },
+  })
   const commitmentKey = Keypair.fromSecret(config.wallet.agentSecretKey ?? '')
   const payments = MppxChannel.create({
     secretKey: config.mpp.secretKey,
@@ -172,6 +288,7 @@ function createLiveStreamApp(): express.Express {
         channel: config.mpp.channelContractId ?? '',
         commitmentKey,
         sourceAccount: commitmentKey.publicKey(),
+        feePayer,
         store: ChannelStore.memory(),
         network: stellarNetwork,
       }),
@@ -196,9 +313,20 @@ function createLiveStreamApp(): express.Express {
           route: req.header('x-xmpp-route') ?? 'mpp-session-reuse',
           tick: Date.now(),
           mode: 'live-session',
+          payment: buildFeeSponsorshipMeta(feePayer),
+        }, {
+          headers: buildExecutionHeaders(feePayer),
         }),
       ),
     )
+  })
+
+  app.get('/stream/status', (_req: express.Request, res: express.Response) => {
+    res.json({
+      live: true,
+      channelContractId: config.mpp.channelContractId ?? null,
+      payment: buildFeeSponsorshipMeta(feePayer),
+    })
   })
 
   return app

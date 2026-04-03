@@ -1,9 +1,10 @@
 import { config } from '@xmpp/config'
 import { Keypair } from '@stellar/stellar-sdk'
+import { basicNodeSigner } from '@stellar/stellar-sdk/contract'
 import { Mppx as MppxCharge, stellar as mppCharge } from '@stellar/mpp/charge/client'
 import { Mppx as MppxChannel, stellar as mppChannel } from '@stellar/mpp/channel/client'
 import { wrapFetchWithPaymentFromConfig } from '@x402/fetch'
-import { createEd25519Signer } from '@x402/stellar'
+import { createEd25519Signer, type ClientStellarSigner } from '@x402/stellar'
 import { ExactStellarScheme } from '@x402/stellar/exact/client'
 import type {
   PaymentChallenge,
@@ -13,6 +14,7 @@ import type {
   RouteKind,
 } from '@xmpp/types'
 import { XLM_SAC_TESTNET } from '@stellar/mpp'
+import { getRouteExecutionPlan } from '@xmpp/wallet'
 
 const stellarNetwork = config.network as 'stellar:testnet' | 'stellar:pubnet'
 const liveFetchCache = new Map<'x402' | 'mpp-charge' | 'mpp-session', typeof fetch>()
@@ -49,8 +51,11 @@ function getExecutionStatus(route: RouteKind): {
   status: PaymentExecutionStatus
   missingConfig: string[]
 } {
+  const requestedMode = process.env.XMPP_PAYMENT_EXECUTION_MODE
   const mode =
-    process.env.XMPP_PAYMENT_EXECUTION_MODE === 'testnet' ? 'testnet' : config.paymentExecutionMode
+    requestedMode === 'mock' || requestedMode === 'testnet'
+      ? requestedMode
+      : config.paymentExecutionMode
 
   if (mode === 'mock') {
     return {
@@ -77,6 +82,7 @@ export function preparePaymentExecution(
 } {
   const receiptId = createReceiptId(route)
   const { mode, status, missingConfig } = getExecutionStatus(route)
+  const executionPlan = getRouteExecutionPlan(route)
 
   return {
     headers: {
@@ -91,6 +97,9 @@ export function preparePaymentExecution(
       route,
       receiptId,
       missingConfig: missingConfig.length > 0 ? missingConfig : undefined,
+      settlementStrategy: executionPlan.settlementStrategy,
+      executionNote: executionPlan.executionNote,
+      smartAccount: executionPlan.smartAccount,
     },
   }
 }
@@ -103,6 +112,22 @@ function getAgentSecretKey() {
   return config.wallet.agentSecretKey
 }
 
+function createX402ClientSigner(): ClientStellarSigner {
+  const executionPlan = getRouteExecutionPlan('x402')
+  if (executionPlan.smartAccount.used && config.wallet.smartAccountContractId) {
+    const keypair = Keypair.fromSecret(getAgentSecretKey())
+    const signer = basicNodeSigner(keypair, config.networkPassphrase)
+
+    return {
+      address: config.wallet.smartAccountContractId,
+      signAuthEntry: signer.signAuthEntry,
+      signTransaction: signer.signTransaction,
+    }
+  }
+
+  return createEd25519Signer(getAgentSecretKey(), stellarNetwork)
+}
+
 function getLiveFetchForRoute(route: RouteKind) {
   if (route === 'x402') {
     const cached = liveFetchCache.get('x402')
@@ -110,7 +135,7 @@ function getLiveFetchForRoute(route: RouteKind) {
       return cached
     }
 
-    const signer = createEd25519Signer(getAgentSecretKey(), stellarNetwork)
+    const signer = createX402ClientSigner()
     const paidFetch = wrapFetchWithPaymentFromConfig(globalThis.fetch, {
       schemes: [
         {
@@ -167,6 +192,7 @@ function getLiveFetchForRoute(route: RouteKind) {
 function createExecutionMetadata(route: RouteKind): PaymentExecutionMetadata {
   const receiptId = createReceiptId(route)
   const { mode, status, missingConfig } = getExecutionStatus(route)
+  const executionPlan = getRouteExecutionPlan(route)
 
   return {
     mode,
@@ -174,6 +200,9 @@ function createExecutionMetadata(route: RouteKind): PaymentExecutionMetadata {
     route,
     receiptId,
     missingConfig: missingConfig.length > 0 ? missingConfig : undefined,
+    settlementStrategy: executionPlan.settlementStrategy,
+    executionNote: executionPlan.executionNote,
+    smartAccount: executionPlan.smartAccount,
   }
 }
 
@@ -184,6 +213,7 @@ function extractEvidenceHeaders(headers: Headers): Record<string, string> | unde
     if (
       normalized.startsWith('x-payment') ||
       normalized.startsWith('x-mpp') ||
+      normalized.startsWith('x-xmpp-') ||
       normalized.includes('receipt') ||
       normalized.includes('transaction')
     ) {
@@ -196,6 +226,15 @@ function extractEvidenceHeaders(headers: Headers): Record<string, string> | unde
   }
 
   return Object.fromEntries(evidenceEntries)
+}
+
+function getBooleanHeader(headers: Headers, name: string) {
+  const value = headers.get(name)
+  if (value == null) {
+    return undefined
+  }
+
+  return value.toLowerCase() === 'true'
 }
 
 export async function executePaymentRoute(
@@ -244,19 +283,45 @@ export async function executePaymentRoute(
   }
 
   const paidFetch = getLiveFetchForRoute(route)
-  const response = await paidFetch(input, init)
+  const liveHeaders = new Headers(init?.headers)
+  liveHeaders.set('x-xmpp-route', route)
+  const response = await paidFetch(input, {
+    ...init,
+    headers: liveHeaders,
+  })
   const headers = new Headers(response.headers)
   const evidenceHeaders = extractEvidenceHeaders(headers)
   const finalMetadata: PaymentExecutionMetadata = {
     ...metadata,
     status: response.status === 402 ? metadata.status : 'settled-testnet',
     evidenceHeaders,
+    feeSponsored: getBooleanHeader(headers, 'x-xmpp-fee-sponsored'),
+    feeSponsorPublicKey: headers.get('x-xmpp-fee-sponsor') ?? undefined,
+    feeBumpPublicKey: headers.get('x-xmpp-fee-bump-sponsor') ?? undefined,
   }
 
   headers.set('x-xmpp-receipt', metadata.receiptId)
   headers.set('x-xmpp-execution-mode', metadata.mode)
   headers.set('x-xmpp-execution-status', finalMetadata.status)
   headers.set('x-xmpp-route', route)
+  if (finalMetadata.settlementStrategy) {
+    headers.set('x-xmpp-settlement-strategy', finalMetadata.settlementStrategy)
+  }
+  if (finalMetadata.smartAccount) {
+    headers.set('x-xmpp-smart-account-used', String(finalMetadata.smartAccount.used))
+    if (finalMetadata.smartAccount.fallbackReason) {
+      headers.set('x-xmpp-smart-account-fallback', finalMetadata.smartAccount.fallbackReason)
+    }
+  }
+  if (typeof finalMetadata.feeSponsored === 'boolean') {
+    headers.set('x-xmpp-fee-sponsored', String(finalMetadata.feeSponsored))
+  }
+  if (finalMetadata.feeSponsorPublicKey) {
+    headers.set('x-xmpp-fee-sponsor', finalMetadata.feeSponsorPublicKey)
+  }
+  if (finalMetadata.feeBumpPublicKey) {
+    headers.set('x-xmpp-fee-bump-sponsor', finalMetadata.feeBumpPublicKey)
+  }
 
   return {
     response: new Response(response.body, {

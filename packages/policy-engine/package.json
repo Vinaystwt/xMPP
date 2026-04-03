@@ -1,14 +1,29 @@
 {
   "name": "@xmpp/policy-engine",
-  "private": true,
+  "version": "0.1.0",
   "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "dist/policy-engine/src/index.js",
+  "types": "dist/policy-engine/src/index.d.ts",
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/policy-engine/src/index.d.ts",
+      "import": "./dist/policy-engine/src/index.js",
+      "default": "./dist/policy-engine/src/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
     "lint": "eslint src",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@xmpp/contract-runtime": "workspace:*",
+    "@xmpp/types": "workspace:*"
   }
 }

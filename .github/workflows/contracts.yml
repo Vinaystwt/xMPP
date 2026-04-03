@@ -1,0 +1,36 @@
+name: contracts
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'contracts/**'
+      - '.github/workflows/contracts.yml'
+  pull_request:
+    paths:
+      - 'contracts/**'
+      - '.github/workflows/contracts.yml'
+
+jobs:
+  soroban:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32v1-none
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: contracts
+
+      - name: Run contract tests
+        working-directory: contracts
+        run: cargo test --workspace
+
+      - name: Build contract wasm
+        working-directory: contracts
+        run: cargo build --release --target wasm32v1-none --workspace
