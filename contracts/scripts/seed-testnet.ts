@@ -87,6 +87,18 @@ async function main() {
   })
   await globalPolicyTx.signAndSend()
 
+  if (typeof client.set_shared_treasury_usd_cents === 'function') {
+    const treasuryTx = await client.set_shared_treasury_usd_cents({
+      amount_usd_cents: toUsdCents(config.dailyBudgetUsd),
+    })
+    await treasuryTx.signAndSend()
+  }
+
+  if (typeof client.reset_treasury === 'function') {
+    const resetTreasuryTx = await client.reset_treasury()
+    await resetTreasuryTx.signAndSend()
+  }
+
   const servicePolicies = [
     {
       serviceId: 'research-api',

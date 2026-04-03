@@ -260,6 +260,23 @@ export type XmppAgentPolicySnapshot = {
   source: 'contract' | 'local' | 'fallback'
 }
 
+export type XmppContractTreasurySnapshot = {
+  sharedTreasuryUsd: number
+  totalSpentUsd: number
+  remainingUsd: number
+  paymentCount: number
+  source: 'contract' | 'local' | 'fallback'
+}
+
+export type XmppContractAgentTreasuryState = {
+  agentId: string
+  spentUsd: number
+  paymentCount: number
+  lastServiceId: string
+  lastRoute: string
+  source: 'contract' | 'local' | 'fallback'
+}
+
 export type XmppOperatorState = {
   sharedTreasuryUsd: number
   sharedTreasuryRemainingUsd: number
@@ -273,6 +290,8 @@ export type XmppOperatorState = {
   agentProfiles: XmppAgentProfile[]
   agentStates: XmppAgentStateSummary[]
   contractAgentPolicies?: XmppAgentPolicySnapshot[]
+  contractTreasury?: XmppContractTreasurySnapshot | null
+  contractAgentTreasuryStates?: XmppContractAgentTreasuryState[]
   openSessions: Array<Pick<XmppSessionRecord, 'sessionId' | 'serviceId' | 'callCount'>>
   recentEvents: XmppRouteEvent[]
 }

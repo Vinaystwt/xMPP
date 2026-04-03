@@ -323,8 +323,10 @@ export async function executePaymentRoute(
     headers.set('x-xmpp-fee-bump-sponsor', finalMetadata.feeBumpPublicKey)
   }
 
+  const body = await response.arrayBuffer()
+
   return {
-    response: new Response(response.body, {
+    response: new Response(body, {
       status: response.status,
       statusText: response.statusText,
       headers,

@@ -1,8 +1,11 @@
 import { createRouter, estimateRouteCost } from '@xmpp/router'
 import {
+  getAgentTreasuryState,
   getAgentPolicySnapshot,
+  getTreasurySnapshot,
   listAgentPolicySnapshots,
   getPolicyRuntimeSnapshot,
+  recordTreasurySpend,
   recordSessionRouteEvent,
 } from '@xmpp/contract-runtime'
 import { executePaymentRoute, preparePaymentExecution } from '@xmpp/payment-adapters'
@@ -244,23 +247,39 @@ async function evaluateSpendPolicy(input: {
   const amountUsdCents = Math.round(input.amountUsd * 100)
   const agentPolicySource: 'contract' | 'local' =
     input.agent.policySource === 'merged' ? 'contract' : 'local'
+  const [contractTreasury, contractAgentTreasury] = await Promise.all([
+    getTreasurySnapshot(),
+    getAgentTreasuryState(input.agent.agentId),
+  ])
+  const effectiveSharedTreasuryUsd = Math.max(
+    config.dailyBudgetUsd,
+    contractTreasury?.sharedTreasuryUsd ?? 0,
+  )
+  const effectiveOperatorSpentUsd = Math.max(
+    state.spentThisSessionUsd,
+    contractTreasury?.totalSpentUsd ?? 0,
+  )
 
-  if (state.spentThisSessionUsd + input.amountUsd > config.dailyBudgetUsd + 1e-9) {
+  if (effectiveOperatorSpentUsd + input.amountUsd > effectiveSharedTreasuryUsd + 1e-9) {
     return {
       allowed: false,
       reason: 'xMPP blocked automatic payment because it would exceed the operator daily budget.',
       code: 'blocked-budget' as const,
-      source: runtime.source,
+      source: contractTreasury ? 'contract' : runtime.source,
     }
   }
 
   const agentState = state.agentStates.find((entry) => entry.agentId === input.agent.agentId)
-  if ((agentState?.spentThisSessionUsd ?? 0) + input.amountUsd > input.agent.dailyBudgetUsd + 1e-9) {
+  const effectiveAgentSpentUsd = Math.max(
+    agentState?.spentThisSessionUsd ?? 0,
+    contractAgentTreasury?.spentUsd ?? 0,
+  )
+  if (effectiveAgentSpentUsd + input.amountUsd > input.agent.dailyBudgetUsd + 1e-9) {
     return {
       allowed: false,
       reason: `${input.agent.displayName} would exceed its daily treasury allocation.`,
       code: 'blocked-budget' as const,
-      source: agentPolicySource,
+      source: contractAgentTreasury ? 'contract' : agentPolicySource,
     }
   }
 
@@ -651,6 +670,12 @@ export async function xmppFetch(
         serviceId: options?.serviceId ?? preview.service?.serviceId ?? 'unknown-service',
         route: liveRoute,
         amountUsd: liveAmountUsd,
+      })
+      await recordTreasurySpend({
+        agentId: agent.agentId,
+        serviceId: options?.serviceId ?? preview.service?.serviceId ?? 'unknown-service',
+        route: liveRoute,
+        amountUsdCents: Math.round(liveAmountUsd * 100),
       })
       recordXmppEvent({
         agentId: agent.agentId,

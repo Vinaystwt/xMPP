@@ -31,6 +31,24 @@ pub struct AgentPolicy {
     pub autopay_methods: Vec<String>,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[contracttype]
+pub struct TreasurySnapshot {
+    pub shared_treasury_usd_cents: i128,
+    pub total_spent_usd_cents: i128,
+    pub payment_count: u32,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[contracttype]
+pub struct AgentTreasuryState {
+    pub agent_id: String,
+    pub spent_usd_cents: i128,
+    pub payment_count: u32,
+    pub last_service_id: String,
+    pub last_route: String,
+}
+
 #[derive(Clone)]
 #[contracttype]
 pub enum DataKey {
@@ -40,6 +58,11 @@ pub enum DataKey {
     ServicePolicy(String),
     AgentPolicy(String),
     AgentPolicyIds,
+    SharedTreasuryUsdCents,
+    TreasuryTotalSpentUsdCents,
+    TreasuryPaymentCount,
+    AgentTreasury(String),
+    AgentTreasuryIds,
 }
 
 #[contract]
@@ -48,7 +71,7 @@ pub struct XmppPolicyContract;
 #[contractimpl]
 impl XmppPolicyContract {
     pub fn version(env: &Env) -> Symbol {
-        Symbol::new(env, "v0.2.0")
+        Symbol::new(env, "v0.3.0")
     }
 
     pub fn bootstrap(env: &Env, admin: Address) {
@@ -58,6 +81,15 @@ impl XmppPolicyContract {
 
         env.storage().instance().set(&DataKey::Admin, &admin);
         env.storage().instance().set(&DataKey::PauseFlag, &false);
+        env.storage()
+            .instance()
+            .set(&DataKey::SharedTreasuryUsdCents, &Self::default_shared_treasury_usd_cents());
+        env.storage()
+            .instance()
+            .set(&DataKey::TreasuryTotalSpentUsdCents, &0_i128);
+        env.storage()
+            .instance()
+            .set(&DataKey::TreasuryPaymentCount, &0_u32);
     }
 
     pub fn admin(env: &Env) -> Option<Address> {
@@ -142,6 +174,155 @@ impl XmppPolicyContract {
         policies
     }
 
+    pub fn set_shared_treasury_usd_cents(env: &Env, amount_usd_cents: i128) {
+        Self::require_admin(env);
+        env.storage()
+            .instance()
+            .set(&DataKey::SharedTreasuryUsdCents, &amount_usd_cents);
+    }
+
+    pub fn get_treasury_snapshot(env: &Env) -> TreasurySnapshot {
+        TreasurySnapshot {
+            shared_treasury_usd_cents: env
+                .storage()
+                .instance()
+                .get(&DataKey::SharedTreasuryUsdCents)
+                .unwrap_or_else(|| Self::default_shared_treasury_usd_cents()),
+            total_spent_usd_cents: env
+                .storage()
+                .instance()
+                .get(&DataKey::TreasuryTotalSpentUsdCents)
+                .unwrap_or(0_i128),
+            payment_count: env
+                .storage()
+                .instance()
+                .get(&DataKey::TreasuryPaymentCount)
+                .unwrap_or(0_u32),
+        }
+    }
+
+    pub fn record_treasury_spend(
+        env: &Env,
+        agent_id: String,
+        service_id: String,
+        route: String,
+        amount_usd_cents: i128,
+    ) -> AgentTreasuryState {
+        Self::require_admin(env);
+
+        let total_spent = env
+            .storage()
+            .instance()
+            .get::<DataKey, i128>(&DataKey::TreasuryTotalSpentUsdCents)
+            .unwrap_or(0_i128)
+            + amount_usd_cents;
+        env.storage()
+            .instance()
+            .set(&DataKey::TreasuryTotalSpentUsdCents, &total_spent);
+
+        let payment_count = env
+            .storage()
+            .instance()
+            .get::<DataKey, u32>(&DataKey::TreasuryPaymentCount)
+            .unwrap_or(0_u32)
+            + 1_u32;
+        env.storage()
+            .instance()
+            .set(&DataKey::TreasuryPaymentCount, &payment_count);
+
+        let key = DataKey::AgentTreasury(agent_id.clone());
+        let existing = env
+            .storage()
+            .instance()
+            .get::<DataKey, AgentTreasuryState>(&key);
+        let is_new = existing.is_none();
+
+        let state = AgentTreasuryState {
+            agent_id: agent_id.clone(),
+            spent_usd_cents: existing
+                .as_ref()
+                .map(|entry| entry.spent_usd_cents)
+                .unwrap_or(0_i128)
+                + amount_usd_cents,
+            payment_count: existing
+                .as_ref()
+                .map(|entry| entry.payment_count)
+                .unwrap_or(0_u32)
+                + 1_u32,
+            last_service_id: service_id,
+            last_route: route,
+        };
+
+        env.storage().instance().set(&key, &state);
+
+        if is_new {
+            let mut ids: Vec<String> = env
+                .storage()
+                .instance()
+                .get(&DataKey::AgentTreasuryIds)
+                .unwrap_or_else(|| Vec::new(env));
+            ids.push_back(agent_id);
+            env.storage().instance().set(&DataKey::AgentTreasuryIds, &ids);
+        }
+
+        state
+    }
+
+    pub fn get_agent_treasury_state(env: &Env, agent_id: String) -> Option<AgentTreasuryState> {
+        env.storage()
+            .instance()
+            .get(&DataKey::AgentTreasury(agent_id))
+    }
+
+    pub fn list_agent_treasury_states(env: &Env) -> Vec<AgentTreasuryState> {
+        let ids: Vec<String> = env
+            .storage()
+            .instance()
+            .get(&DataKey::AgentTreasuryIds)
+            .unwrap_or_else(|| Vec::new(env));
+
+        let mut states = Vec::new(env);
+        for agent_id in ids.iter() {
+            if let Some(state) = env
+                .storage()
+                .instance()
+                .get::<DataKey, AgentTreasuryState>(&DataKey::AgentTreasury(agent_id))
+            {
+                states.push_back(state);
+            }
+        }
+
+        states
+    }
+
+    pub fn reset_treasury(env: &Env) {
+        Self::require_admin(env);
+        env.storage()
+            .instance()
+            .set(&DataKey::TreasuryTotalSpentUsdCents, &0_i128);
+        env.storage()
+            .instance()
+            .set(&DataKey::TreasuryPaymentCount, &0_u32);
+
+        let ids: Vec<String> = env
+            .storage()
+            .instance()
+            .get(&DataKey::AgentTreasuryIds)
+            .unwrap_or_else(|| Vec::new(env));
+        for agent_id in ids.iter() {
+            let state = AgentTreasuryState {
+                agent_id: agent_id.clone(),
+                spent_usd_cents: 0_i128,
+                payment_count: 0_u32,
+                last_service_id: String::from_str(env, ""),
+                last_route: String::from_str(env, ""),
+            };
+            env.storage()
+                .instance()
+                .set(&DataKey::AgentTreasury(agent_id), &state);
+        }
+    }
+
     pub fn set_pause_flag(env: &Env, paused: bool) {
         Self::require_admin(env);
         env.storage().instance().set(&DataKey::PauseFlag, &paused);
@@ -171,13 +352,20 @@ impl XmppPolicyContract {
             allow_post_autopay: false,
         }
     }
+
+    fn default_shared_treasury_usd_cents() -> i128 {
+        50
+    }
 }
 
 #[cfg(test)]
 mod test {
     use soroban_sdk::{testutils::Address as _, Address, Env, String, Vec};
 
-    use crate::{AgentPolicy, GlobalPolicy, ServicePolicy, XmppPolicyContract, XmppPolicyContractClient};
+    use crate::{
+        AgentPolicy, AgentTreasuryState, GlobalPolicy, ServicePolicy, XmppPolicyContract,
+        XmppPolicyContractClient,
+    };
 
     #[test]
     fn bootstrap_and_read_defaults() {
@@ -278,5 +466,60 @@ mod test {
         let mut expected = Vec::new(&env);
         expected.push_back(policy);
         assert_eq!(client.list_agent_policies(), expected);
+    }
+
+    #[test]
+    fn record_and_reset_treasury_state() {
+        let env = Env::default();
+        env.mock_all_auths();
+
+        let contract_id = env.register(XmppPolicyContract, ());
+        let client = XmppPolicyContractClient::new(&env, &contract_id);
+        let admin = Address::generate(&env);
+        client.bootstrap(&admin);
+
+        client.set_shared_treasury_usd_cents(&50_i128);
+        let state = client.record_treasury_spend(
+            &String::from_str(&env, "market-agent"),
+            &String::from_str(&env, "market-api"),
+            &String::from_str(&env, "mpp-charge"),
+            &3_i128,
+        );
+
+        assert_eq!(
+            state,
+            AgentTreasuryState {
+                agent_id: String::from_str(&env, "market-agent"),
+                spent_usd_cents: 3_i128,
+                payment_count: 1_u32,
+                last_service_id: String::from_str(&env, "market-api"),
+                last_route: String::from_str(&env, "mpp-charge"),
+            }
+        );
+
+        let snapshot = client.get_treasury_snapshot();
+        assert_eq!(snapshot.shared_treasury_usd_cents, 50_i128);
+        assert_eq!(snapshot.total_spent_usd_cents, 3_i128);
+        assert_eq!(snapshot.payment_count, 1_u32);
+        assert_eq!(
+            client.get_agent_treasury_state(&String::from_str(&env, "market-agent")),
+            Some(state.clone())
+        );
+        assert_eq!(client.list_agent_treasury_states().len(), 1);
+
+        client.reset_treasury();
+        let reset_snapshot = client.get_treasury_snapshot();
+        assert_eq!(reset_snapshot.total_spent_usd_cents, 0_i128);
+        assert_eq!(reset_snapshot.payment_count, 0_u32);
+        assert_eq!(
+            client.get_agent_treasury_state(&String::from_str(&env, "market-agent")),
+            Some(AgentTreasuryState {
+                agent_id: String::from_str(&env, "market-agent"),
+                spent_usd_cents: 0_i128,
+                payment_count: 0_u32,
+                last_service_id: String::from_str(&env, ""),
+                last_route: String::from_str(&env, ""),
+            })
+        );
     }
 }

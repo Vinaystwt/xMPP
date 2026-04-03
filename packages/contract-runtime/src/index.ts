@@ -2,7 +2,13 @@ import { Keypair } from '@stellar/stellar-sdk'
 import { Client, basicNodeSigner } from '@stellar/stellar-sdk/contract'
 import { config } from '@xmpp/config'
 import { logger } from '@xmpp/logger'
-import type { RouteKind, XmppAgentPolicySnapshot, XmppSessionRecord } from '@xmpp/types'
+import type {
+  RouteKind,
+  XmppAgentPolicySnapshot,
+  XmppContractAgentTreasuryState,
+  XmppContractTreasurySnapshot,
+  XmppSessionRecord,
+} from '@xmpp/types'
 
 type DynamicContractClient = Client &
   Record<
@@ -34,6 +40,20 @@ type ContractAgentPolicy = {
   allowed_services: string[]
   preferred_routes: string[]
   autopay_methods: string[]
+}
+
+type ContractTreasurySnapshot = {
+  shared_treasury_usd_cents: bigint | number
+  total_spent_usd_cents: bigint | number
+  payment_count: number
+}
+
+type ContractAgentTreasuryState = {
+  agent_id: string
+  spent_usd_cents: bigint | number
+  payment_count: number
+  last_service_id: string
+  last_route: string
 }
 
 export type PolicyRuntimeSnapshot = {
@@ -228,6 +248,42 @@ function normalizeAgentPolicy(policy: ContractAgentPolicy | null | undefined): X
   }
 }
 
+function normalizeTreasurySnapshot(
+  snapshot: ContractTreasurySnapshot | null | undefined,
+): XmppContractTreasurySnapshot | null {
+  if (!snapshot) {
+    return null
+  }
+
+  const sharedTreasuryUsd = toNumber(snapshot.shared_treasury_usd_cents) / 100
+  const totalSpentUsd = toNumber(snapshot.total_spent_usd_cents) / 100
+
+  return {
+    sharedTreasuryUsd,
+    totalSpentUsd,
+    remainingUsd: Math.max(0, sharedTreasuryUsd - totalSpentUsd),
+    paymentCount: Number(snapshot.payment_count ?? 0),
+    source: 'contract',
+  }
+}
+
+function normalizeAgentTreasuryState(
+  state: ContractAgentTreasuryState | null | undefined,
+): XmppContractAgentTreasuryState | null {
+  if (!state) {
+    return null
+  }
+
+  return {
+    agentId: state.agent_id,
+    spentUsd: toNumber(state.spent_usd_cents) / 100,
+    paymentCount: Number(state.payment_count ?? 0),
+    lastServiceId: state.last_service_id,
+    lastRoute: state.last_route,
+    source: 'contract',
+  }
+}
+
 function normalizeSessionRecord(record: Record<string, unknown>): XmppSessionRecord {
   return {
     sessionId: String(record.session_id ?? ''),
@@ -290,6 +346,63 @@ export async function listAgentPolicySnapshots(): Promise<XmppAgentPolicySnapsho
   }
 }
 
+export async function getTreasurySnapshot(): Promise<XmppContractTreasurySnapshot | null> {
+  const client = await getPolicyClient()
+  if (!client || !hasMethod(client, 'get_treasury_snapshot', 'policy')) {
+    return null
+  }
+
+  try {
+    const tx = await client.get_treasury_snapshot()
+    return normalizeTreasurySnapshot(
+      (tx.result as ContractTreasurySnapshot | null | undefined) ?? null,
+    )
+  } catch (error) {
+    logger.warn({ error }, '[xMPP] failed to read treasury snapshot from contract')
+    return null
+  }
+}
+
+export async function getAgentTreasuryState(
+  agentId: string,
+): Promise<XmppContractAgentTreasuryState | null> {
+  const client = await getPolicyClient()
+  if (!client || !hasMethod(client, 'get_agent_treasury_state', 'policy')) {
+    return null
+  }
+
+  try {
+    const tx = await client.get_agent_treasury_state({ agent_id: agentId })
+    return normalizeAgentTreasuryState(
+      (tx.result as ContractAgentTreasuryState | null | undefined) ?? null,
+    )
+  } catch (error) {
+    logger.warn({ error, agentId }, '[xMPP] failed to read agent treasury state from contract')
+    return null
+  }
+}
+
+export async function listAgentTreasuryStates(): Promise<XmppContractAgentTreasuryState[]> {
+  const client = await getPolicyClient()
+  if (!client || !hasMethod(client, 'list_agent_treasury_states', 'policy')) {
+    return []
+  }
+
+  try {
+    const tx = await client.list_agent_treasury_states()
+    const result = tx.result as Array<ContractAgentTreasuryState> | null | undefined
+    return Array.isArray(result)
+      ? result.flatMap((entry) => {
+          const normalized = normalizeAgentTreasuryState(entry)
+          return normalized ? [normalized] : []
+        })
+      : []
+  } catch (error) {
+    logger.warn({ error }, '[xMPP] failed to list agent treasury states from contract')
+    return []
+  }
+}
+
 export async function getPolicyRuntimeSnapshot(serviceId?: string): Promise<PolicyRuntimeSnapshot> {
   const client = await getPolicyClient()
   if (!client) {
@@ -325,6 +438,32 @@ export async function getPolicyRuntimeSnapshot(serviceId?: string): Promise<Poli
       globalPolicy: null,
       servicePolicy: null,
     }
+  }
+}
+
+export async function recordTreasurySpend(input: {
+  agentId: string
+  serviceId: string
+  route: RouteKind
+  amountUsdCents: number
+}): Promise<XmppContractAgentTreasuryState | null> {
+  const client = await getPolicyClient()
+  if (!client || !hasMethod(client, 'record_treasury_spend', 'policy')) {
+    return null
+  }
+
+  try {
+    const tx = await client.record_treasury_spend({
+      agent_id: input.agentId,
+      service_id: input.serviceId,
+      route: input.route,
+      amount_usd_cents: BigInt(input.amountUsdCents),
+    })
+    const sent = await tx.signAndSend()
+    return normalizeAgentTreasuryState(sent.result as ContractAgentTreasuryState)
+  } catch (error) {
+    logger.warn({ error, input }, '[xMPP] failed to record treasury spend in contract')
+    return null
   }
 }
 
