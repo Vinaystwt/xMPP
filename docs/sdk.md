@@ -22,6 +22,28 @@ xmpp-demo bootstrap --friendbot --fee-sponsor
 
 It generates `XMPP_AGENT_SECRET_KEY`, `FACILITATOR_STELLAR_PRIVATE_KEY`, and `MPP_SECRET_KEY` into a local `.env.local`, with optional Friendbot funding and optional fee-sponsor identity generation.
 
+## Local Release Verification
+
+Use the workspace release check to build and pack the public package family into `.release/`:
+
+```bash
+pnpm release:pack
+```
+
+That flow currently verifies these packages locally:
+
+- `@xmpp/types`
+- `@xmpp/logger`
+- `@xmpp/config`
+- `@xmpp/router`
+- `@xmpp/contract-runtime`
+- `@xmpp/wallet`
+- `@xmpp/payment-adapters`
+- `@xmpp/policy-engine`
+- `@xmpp/http-interceptor`
+- `@xmpp/core`
+- `@xmpp/mcp`
+
 ## Example
 
 ```ts

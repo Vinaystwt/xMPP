@@ -4,6 +4,15 @@
   "type": "module",
   "version": "0.1.0",
   "description": "xMPP: the ultimate x402 ↔ MPP brain for autonomous agents on Stellar.",
+  "license": "MIT",
+  "homepage": "https://github.com/Vinaystwt/xMPP#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vinaystwt/xMPP.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Vinaystwt/xMPP/issues"
+  },
   "packageManager": "pnpm@10.33.0",
   "engines": {
     "node": ">=22.18.0",
@@ -27,7 +36,9 @@
     "xmpp:bootstrap": "pnpm exec tsx scripts/bootstrap-testnet.ts",
     "xmpp:demo": "pnpm exec tsx scripts/demo-stack.ts",
     "xmpp:demo:smoke": "pnpm exec tsx scripts/demo-stack.ts --smoke",
-    "xmpp:test": "pnpm check"
+    "xmpp:test": "pnpm check",
+    "release:pack": "pnpm build && pnpm exec tsx scripts/pack-public-packages.ts",
+    "release:check": "pnpm check && pnpm release:pack"
   },
   "devDependencies": {
     "@stellar/stellar-sdk": "^15.0.1",

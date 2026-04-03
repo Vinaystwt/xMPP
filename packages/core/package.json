@@ -3,9 +3,20 @@
   "version": "0.1.0",
   "description": "Installable xMPP SDK with gateway client, route planning, and local Stellar payment routing helpers.",
   "type": "module",
+  "license": "MIT",
   "main": "dist/core/src/index.js",
   "types": "dist/core/src/index.d.ts",
-  "files": ["dist"],
+  "files": ["dist", "README.md", "LICENSE"],
+  "homepage": "https://github.com/Vinaystwt/xMPP#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vinaystwt/xMPP.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/Vinaystwt/xMPP/issues"
+  },
+  "keywords": ["xmpp", "stellar", "x402", "mpp", "mcp", "agents"],
   "exports": {
     ".": {
       "types": "./dist/core/src/index.d.ts",

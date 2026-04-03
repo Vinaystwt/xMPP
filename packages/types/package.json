@@ -1,10 +1,23 @@
 {
   "name": "@xmpp/types",
   "version": "0.1.0",
+  "description": "Shared TypeScript types for xMPP gateways, SDKs, MCP tools, and operator state.",
   "type": "module",
+  "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist"],
+  "files": ["dist", "LICENSE"],
+  "sideEffects": false,
+  "homepage": "https://github.com/Vinaystwt/xMPP#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vinaystwt/xMPP.git",
+    "directory": "packages/types"
+  },
+  "bugs": {
+    "url": "https://github.com/Vinaystwt/xMPP/issues"
+  },
+  "keywords": ["xmpp", "types", "stellar", "agents"],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

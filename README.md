@@ -123,6 +123,7 @@ Workspace checks:
 ```bash
 pnpm check
 cd contracts && cargo test
+pnpm release:pack
 ```
 
 Live smoke path:
@@ -138,6 +139,16 @@ The smoke script exercises:
 - `mpp-charge`
 - `mpp-session-open`
 - `mpp-session-reuse`
+
+## Installable Packages
+
+The public package family is release-packed locally through:
+
+```bash
+pnpm release:pack
+```
+
+That creates `.release/manifest.json` plus tarballs for the publishable workspace packages, including `@xmpp/core` and `@xmpp/mcp`.
 - policy deny flow
 
 ## Gateway API

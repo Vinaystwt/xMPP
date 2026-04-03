@@ -1,10 +1,23 @@
 {
   "name": "@xmpp/contract-runtime",
   "version": "0.1.0",
+  "description": "Contract client helpers for xMPP policy and session registry flows on Soroban.",
   "type": "module",
+  "license": "MIT",
   "main": "dist/contract-runtime/src/index.js",
   "types": "dist/contract-runtime/src/index.d.ts",
-  "files": ["dist"],
+  "files": ["dist", "LICENSE"],
+  "sideEffects": false,
+  "homepage": "https://github.com/Vinaystwt/xMPP#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vinaystwt/xMPP.git",
+    "directory": "packages/contract-runtime"
+  },
+  "bugs": {
+    "url": "https://github.com/Vinaystwt/xMPP/issues"
+  },
+  "keywords": ["xmpp", "stellar", "soroban", "contracts", "agents"],
   "exports": {
     ".": {
       "types": "./dist/contract-runtime/src/index.d.ts",

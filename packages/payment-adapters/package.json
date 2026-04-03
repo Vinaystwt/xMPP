@@ -1,10 +1,23 @@
 {
   "name": "@xmpp/payment-adapters",
   "version": "0.1.0",
+  "description": "xMPP payment execution adapters for Stellar x402, MPP charge, and MPP session flows.",
   "type": "module",
+  "license": "MIT",
   "main": "dist/payment-adapters/src/index.js",
   "types": "dist/payment-adapters/src/index.d.ts",
-  "files": ["dist"],
+  "files": ["dist", "LICENSE"],
+  "sideEffects": false,
+  "homepage": "https://github.com/Vinaystwt/xMPP#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vinaystwt/xMPP.git",
+    "directory": "packages/payment-adapters"
+  },
+  "bugs": {
+    "url": "https://github.com/Vinaystwt/xMPP/issues"
+  },
+  "keywords": ["xmpp", "stellar", "x402", "mpp", "payments"],
   "exports": {
     ".": {
       "types": "./dist/payment-adapters/src/index.d.ts",

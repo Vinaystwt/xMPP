@@ -1,10 +1,23 @@
 {
   "name": "@xmpp/logger",
   "version": "0.1.0",
+  "description": "Shared structured logging utilities for xMPP services and SDK packages.",
   "type": "module",
+  "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist"],
+  "files": ["dist", "LICENSE"],
+  "sideEffects": false,
+  "homepage": "https://github.com/Vinaystwt/xMPP#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vinaystwt/xMPP.git",
+    "directory": "packages/logger"
+  },
+  "bugs": {
+    "url": "https://github.com/Vinaystwt/xMPP/issues"
+  },
+  "keywords": ["xmpp", "logger", "stellar", "agents"],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

@@ -1,10 +1,22 @@
 {
   "name": "@xmpp/mcp",
   "version": "0.1.0",
+  "description": "Installable xMPP MCP server exposing paid-fetch, route explainability, receipts, and operator tools.",
   "type": "module",
+  "license": "MIT",
   "main": "dist/apps/mcp-server/src/server.js",
   "types": "dist/apps/mcp-server/src/server.d.ts",
-  "files": ["dist"],
+  "files": ["dist", "README.md", "LICENSE"],
+  "homepage": "https://github.com/Vinaystwt/xMPP#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vinaystwt/xMPP.git",
+    "directory": "apps/mcp-server"
+  },
+  "bugs": {
+    "url": "https://github.com/Vinaystwt/xMPP/issues"
+  },
+  "keywords": ["xmpp", "mcp", "stellar", "x402", "mpp", "agents"],
   "exports": {
     ".": {
       "types": "./dist/apps/mcp-server/src/server.d.ts",
