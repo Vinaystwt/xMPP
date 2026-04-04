@@ -13,18 +13,6 @@
 - `@vinaystwt/xmpp-mcp`
   - `createXmppMcpServer()` and `runXmppMcpServer()` for stdio MCP integrations
 
-### Advanced infrastructure modules
-
-- `@vinaystwt/xmpp-router`
-- `@vinaystwt/xmpp-wallet`
-- `@vinaystwt/xmpp-payment-adapters`
-- `@vinaystwt/xmpp-policy-engine`
-- `@vinaystwt/xmpp-contract-runtime`
-- `@vinaystwt/xmpp-http-interceptor`
-- `@vinaystwt/xmpp-config`
-- `@vinaystwt/xmpp-types`
-- `@vinaystwt/xmpp-logger`
-
 ## CLI
 
 The SDK ships a small bootstrap CLI:

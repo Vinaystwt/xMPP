@@ -284,23 +284,12 @@ See [agent-flow.md](./docs/agent-flow.md) for the canonical sequence.
 
 The workspace package names stay under `@xmpp/*` inside the repo.
 
-The published npm package family is split into:
+The public npm story is intentionally small:
 
-- recommended entrypoints
-  - `@vinaystwt/xmpp-core`
-  - `@vinaystwt/xmpp-mcp`
-- advanced infrastructure modules
-  - `@vinaystwt/xmpp-router`
-  - `@vinaystwt/xmpp-wallet`
-  - `@vinaystwt/xmpp-payment-adapters`
-  - `@vinaystwt/xmpp-policy-engine`
-  - `@vinaystwt/xmpp-contract-runtime`
-  - `@vinaystwt/xmpp-http-interceptor`
-  - `@vinaystwt/xmpp-config`
-  - `@vinaystwt/xmpp-types`
-  - `@vinaystwt/xmpp-logger`
+- `@vinaystwt/xmpp-core`
+- `@vinaystwt/xmpp-mcp`
 
-Most builders should start with `@vinaystwt/xmpp-core` or `@vinaystwt/xmpp-mcp`. The rest are published as composable modules for advanced integrations and custom infrastructure work.
+Those are the only packages meant to be treated as public entrypoints.
 
 Build the local workspace package surfaces:
 

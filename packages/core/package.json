@@ -1,6 +1,6 @@
 {
   "name": "@xmpp/core",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Public xMPP SDK for payment-aware agent calls on Stellar, with route-aware fetch, workflow estimation, and local helpers.",
   "type": "module",
   "license": "MIT",

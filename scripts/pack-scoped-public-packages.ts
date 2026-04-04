@@ -1,5 +1,5 @@
-import { cp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
-import { resolve } from 'node:path'
+import { cp, mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
+import { dirname, extname, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawn } from 'node:child_process'
 
@@ -7,19 +7,44 @@ const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
 const releaseDir = resolve(repoRoot, '.release-public')
 const publicScope = '@vinaystwt'
 
-const publicPackages = [
-  { workspaceName: '@xmpp/types', directory: 'packages/types' },
-  { workspaceName: '@xmpp/logger', directory: 'packages/logger' },
-  { workspaceName: '@xmpp/config', directory: 'packages/config' },
-  { workspaceName: '@xmpp/router', directory: 'packages/router' },
-  { workspaceName: '@xmpp/contract-runtime', directory: 'packages/contract-runtime' },
-  { workspaceName: '@xmpp/wallet', directory: 'packages/wallet' },
-  { workspaceName: '@xmpp/payment-adapters', directory: 'packages/payment-adapters' },
-  { workspaceName: '@xmpp/policy-engine', directory: 'packages/policy-engine' },
-  { workspaceName: '@xmpp/http-interceptor', directory: 'packages/http-interceptor' },
-  { workspaceName: '@xmpp/core', directory: 'packages/core' },
-  { workspaceName: '@xmpp/mcp', directory: 'apps/mcp-server' },
-] as const
+type PublicPackage = {
+  workspaceName: '@xmpp/core' | '@xmpp/mcp'
+  directory: string
+  embeddedTargets: Record<string, string>
+}
+
+const publicPackages: PublicPackage[] = [
+  {
+    workspaceName: '@xmpp/core',
+    directory: 'packages/core',
+    embeddedTargets: {
+      '@xmpp/config': 'dist/config/src/index.js',
+      '@xmpp/contract-runtime': 'dist/contract-runtime/src/index.js',
+      '@xmpp/http-interceptor': 'dist/http-interceptor/src/index.js',
+      '@xmpp/logger': 'dist/logger/src/index.js',
+      '@xmpp/payment-adapters': 'dist/payment-adapters/src/index.js',
+      '@xmpp/policy-engine': 'dist/policy-engine/src/index.js',
+      '@xmpp/router': 'dist/router/src/index.js',
+      '@xmpp/types': 'dist/types/src/index.js',
+      '@xmpp/wallet': 'dist/wallet/src/index.js',
+    },
+  },
+  {
+    workspaceName: '@xmpp/mcp',
+    directory: 'apps/mcp-server',
+    embeddedTargets: {
+      '@xmpp/config': 'dist/packages/config/src/index.js',
+      '@xmpp/contract-runtime': 'dist/packages/contract-runtime/src/index.js',
+      '@xmpp/http-interceptor': 'dist/packages/http-interceptor/src/index.js',
+      '@xmpp/logger': 'dist/packages/logger/src/index.js',
+      '@xmpp/payment-adapters': 'dist/packages/payment-adapters/src/index.js',
+      '@xmpp/policy-engine': 'dist/packages/policy-engine/src/index.js',
+      '@xmpp/router': 'dist/packages/router/src/index.js',
+      '@xmpp/types': 'dist/packages/types/src/index.js',
+      '@xmpp/wallet': 'dist/packages/wallet/src/index.js',
+    },
+  },
+]
 
 const publishedNameByWorkspace = new Map(
   publicPackages.map(({ workspaceName }) => [
@@ -36,6 +61,61 @@ function rewritePackageReferences(text: string) {
     next = next.replaceAll(workspaceName, publishedName)
   }
   return next
+}
+
+async function walkFiles(rootDir: string, files: string[] = []) {
+  for (const entry of await readdir(rootDir)) {
+    const fullPath = resolve(rootDir, entry)
+    const entryStat = await stat(fullPath)
+    if (entryStat.isDirectory()) {
+      await walkFiles(fullPath, files)
+      continue
+    }
+
+    files.push(fullPath)
+  }
+
+  return files
+}
+
+function createRelativeImport(sourceFile: string, targetFile: string) {
+  let next = relative(dirname(sourceFile), targetFile).replaceAll('\\', '/')
+  if (!next.startsWith('.')) {
+    next = `./${next}`
+  }
+  return next
+}
+
+async function rewriteEmbeddedImports(stageDir: string, embeddedTargets: Record<string, string>) {
+  const distDir = resolve(stageDir, 'dist')
+  const files = await walkFiles(distDir)
+
+  for (const file of files) {
+    const isJavaScript = extname(file) === '.js'
+    const isDeclaration = file.endsWith('.d.ts')
+    if (!isJavaScript && !isDeclaration) {
+      continue
+    }
+
+    let text = await readFile(file, 'utf8')
+    let changed = false
+
+    for (const [workspaceName, embeddedTarget] of Object.entries(embeddedTargets)) {
+      const targetFile = resolve(stageDir, embeddedTarget)
+      const relativeTarget = createRelativeImport(file, targetFile)
+
+      const before = text
+      text = text.replaceAll(`'${workspaceName}'`, `'${relativeTarget}'`)
+      text = text.replaceAll(`"${workspaceName}"`, `"${relativeTarget}"`)
+      if (text !== before) {
+        changed = true
+      }
+    }
+
+    if (changed) {
+      await writeFile(file, text, 'utf8')
+    }
+  }
 }
 
 async function packStage(stageDir: string) {
@@ -62,7 +142,7 @@ async function packStage(stageDir: string) {
   return after.find((entry) => entry.endsWith('.tgz') && !before.has(entry)) ?? ''
 }
 
-async function stagePackage(entry: (typeof publicPackages)[number]) {
+async function stagePackage(entry: PublicPackage) {
   const sourceDir = resolve(repoRoot, entry.directory)
   const stageDir = resolve(releaseDir, entry.workspaceName.split('/')[1])
   await mkdir(stageDir, { recursive: true })
@@ -71,6 +151,7 @@ async function stagePackage(entry: (typeof publicPackages)[number]) {
 
   const packageJson = JSON.parse(await readFile(resolve(sourceDir, 'package.json'), 'utf8')) as {
     name: string
+    version: string
     dependencies?: Record<string, string>
     devDependencies?: Record<string, string>
     peerDependencies?: Record<string, string>
@@ -89,14 +170,22 @@ async function stagePackage(entry: (typeof publicPackages)[number]) {
       continue
     }
 
-    packageJson[key] = Object.fromEntries(
-      Object.entries(packageJson[key]!).map(([dependency, version]) => [
-        publishedNameByWorkspace.get(dependency) ?? dependency,
-        typeof version === 'string' && version.startsWith('workspace:')
-          ? versionByWorkspace.get(dependency) ?? '0.1.0'
-          : version,
-      ]),
-    )
+    const nextEntries = Object.entries(packageJson[key]!).flatMap(([dependency, version]) => {
+      if (dependency.startsWith('@xmpp/')) {
+        return []
+      }
+
+      return [[dependency, typeof version === 'string' && version.startsWith('workspace:')
+        ? versionByWorkspace.get(dependency) ?? '0.1.0'
+        : version]]
+    })
+
+    if (nextEntries.length === 0) {
+      delete packageJson[key]
+      continue
+    }
+
+    packageJson[key] = Object.fromEntries(nextEntries)
   }
 
   await writeFile(resolve(stageDir, 'package.json'), `${JSON.stringify(packageJson, null, 2)}\n`, 'utf8')
@@ -106,13 +195,16 @@ async function stagePackage(entry: (typeof publicPackages)[number]) {
     const readme = await readFile(resolve(sourceDir, 'README.md'), 'utf8')
     await writeFile(resolve(stageDir, 'README.md'), rewritePackageReferences(readme), 'utf8')
   } catch {
-    // README is optional for the lower-level packages.
+    // README is optional.
   }
+
+  await rewriteEmbeddedImports(stageDir, entry.embeddedTargets)
 
   const tarball = await packStage(stageDir)
   return {
     workspaceName: entry.workspaceName,
     publishedName: packageJson.name,
+    version: packageJson.version,
     stageDir,
     tarball,
   }

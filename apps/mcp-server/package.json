@@ -1,6 +1,6 @@
 {
   "name": "@xmpp/mcp",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Public xMPP MCP server for payment-aware agent workflows on Stellar, with fetch, preview, explain, session, and receipt tools.",
   "type": "module",
   "license": "MIT",
