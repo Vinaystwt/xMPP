@@ -1,12 +1,12 @@
 {
   "name": "@xmpp/http-interceptor",
-  "version": "0.1.0",
-  "description": "HTTP 402 interception, policy enforcement, retries, receipts, and operator state for xMPP.",
+  "version": "0.1.1",
+  "description": "Advanced xMPP execution engine for HTTP 402 interception, retries, receipts, and operator state.",
   "type": "module",
   "license": "MIT",
   "main": "dist/http-interceptor/src/index.js",
   "types": "dist/http-interceptor/src/index.d.ts",
-  "files": ["dist", "LICENSE"],
+  "files": ["dist", "README.md", "LICENSE"],
   "sideEffects": false,
   "homepage": "https://github.com/Vinaystwt/xMPP#readme",
   "repository": {
@@ -17,7 +17,7 @@
   "bugs": {
     "url": "https://github.com/Vinaystwt/xMPP/issues"
   },
-  "keywords": ["xmpp", "stellar", "http", "x402", "mpp"],
+  "keywords": ["xmpp", "stellar", "http", "x402", "mpp", "receipts", "operators"],
   "exports": {
     ".": {
       "types": "./dist/http-interceptor/src/index.d.ts",

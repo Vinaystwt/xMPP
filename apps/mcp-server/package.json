@@ -1,7 +1,7 @@
 {
   "name": "@xmpp/mcp",
-  "version": "0.1.0",
-  "description": "Installable xMPP MCP server exposing paid-fetch, route explainability, receipts, and operator tools.",
+  "version": "0.1.1",
+  "description": "Public xMPP MCP server for payment-aware agent workflows on Stellar, with fetch, preview, explain, session, and receipt tools.",
   "type": "module",
   "license": "MIT",
   "main": "dist/apps/mcp-server/src/server.js",
@@ -16,7 +16,7 @@
   "bugs": {
     "url": "https://github.com/Vinaystwt/xMPP/issues"
   },
-  "keywords": ["xmpp", "mcp", "stellar", "x402", "mpp", "agents"],
+  "keywords": ["stellar", "x402", "mpp", "mcp", "agents", "payments", "server", "xmpp"],
   "exports": {
     ".": {
       "types": "./dist/apps/mcp-server/src/server.d.ts",

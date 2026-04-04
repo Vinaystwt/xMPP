@@ -6,7 +6,7 @@ Use this checklist before sharing or recording the stack.
 
 - `pnpm check`
 - `cd contracts && cargo test`
-- `pnpm release:pack`
+- `pnpm release:pack:public`
 
 ## Live Payment Paths
 

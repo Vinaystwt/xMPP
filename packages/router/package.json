@@ -1,12 +1,12 @@
 {
   "name": "@xmpp/router",
-  "version": "0.1.0",
-  "description": "Cost-aware route scoring and workflow estimation across x402, MPP charge, and MPP session flows.",
+  "version": "0.1.1",
+  "description": "Advanced xMPP route-scoring package for x402, MPP charge, and MPP session planning.",
   "type": "module",
   "license": "MIT",
   "main": "dist/router/src/index.js",
   "types": "dist/router/src/index.d.ts",
-  "files": ["dist", "LICENSE"],
+  "files": ["dist", "README.md", "LICENSE"],
   "sideEffects": false,
   "homepage": "https://github.com/Vinaystwt/xMPP#readme",
   "repository": {
@@ -17,7 +17,7 @@
   "bugs": {
     "url": "https://github.com/Vinaystwt/xMPP/issues"
   },
-  "keywords": ["xmpp", "router", "stellar", "x402", "mpp"],
+  "keywords": ["xmpp", "router", "stellar", "x402", "mpp", "economics", "planning"],
   "exports": {
     ".": {
       "types": "./dist/router/src/index.d.ts",

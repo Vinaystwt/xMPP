@@ -2,6 +2,8 @@
 
 ## Packages
 
+### Recommended entrypoints
+
 - `@vinaystwt/xmpp-core`
   - gateway client for `GET /health`, `GET /wallet`, `GET /catalog`, `GET /operator/state`, `GET /policy/preview`, `POST /receipts/verify`, and `POST /fetch`
   - router helpers for preview and workflow estimation
@@ -10,6 +12,18 @@
   - in-process `xmppFetch`, metadata extraction, local session listing, and operator-state helpers
 - `@vinaystwt/xmpp-mcp`
   - `createXmppMcpServer()` and `runXmppMcpServer()` for stdio MCP integrations
+
+### Advanced infrastructure modules
+
+- `@vinaystwt/xmpp-router`
+- `@vinaystwt/xmpp-wallet`
+- `@vinaystwt/xmpp-payment-adapters`
+- `@vinaystwt/xmpp-policy-engine`
+- `@vinaystwt/xmpp-contract-runtime`
+- `@vinaystwt/xmpp-http-interceptor`
+- `@vinaystwt/xmpp-config`
+- `@vinaystwt/xmpp-types`
+- `@vinaystwt/xmpp-logger`
 
 ## CLI
 
@@ -30,19 +44,7 @@ Use the workspace release check to build and pack the public package family into
 pnpm release:pack:public
 ```
 
-That flow stages these public package names:
-
-- `@vinaystwt/xmpp-types`
-- `@vinaystwt/xmpp-logger`
-- `@vinaystwt/xmpp-config`
-- `@vinaystwt/xmpp-router`
-- `@vinaystwt/xmpp-contract-runtime`
-- `@vinaystwt/xmpp-wallet`
-- `@vinaystwt/xmpp-payment-adapters`
-- `@vinaystwt/xmpp-policy-engine`
-- `@vinaystwt/xmpp-http-interceptor`
-- `@vinaystwt/xmpp-core`
-- `@vinaystwt/xmpp-mcp`
+That flow stages the published npm package family, with `@vinaystwt/xmpp-core` and `@vinaystwt/xmpp-mcp` as the recommended entrypoints.
 
 ## Example
 

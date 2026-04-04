@@ -230,10 +230,10 @@ The smoke script exercises:
 The public package family is release-packed locally through:
 
 ```bash
-pnpm release:pack
+pnpm release:pack:public
 ```
 
-That creates `.release/manifest.json` plus tarballs for the publishable workspace packages, including `@xmpp/core` and `@xmpp/mcp`.
+That creates `.release-public/manifest.json` plus tarballs for the published scoped package family.
 - policy deny flow
 
 ## Gateway API
@@ -284,7 +284,23 @@ See [agent-flow.md](./docs/agent-flow.md) for the canonical sequence.
 
 The workspace package names stay under `@xmpp/*` inside the repo.
 
-The public npm release family is staged under `@vinaystwt/*` so it can be published from the current npm account.
+The published npm package family is split into:
+
+- recommended entrypoints
+  - `@vinaystwt/xmpp-core`
+  - `@vinaystwt/xmpp-mcp`
+- advanced infrastructure modules
+  - `@vinaystwt/xmpp-router`
+  - `@vinaystwt/xmpp-wallet`
+  - `@vinaystwt/xmpp-payment-adapters`
+  - `@vinaystwt/xmpp-policy-engine`
+  - `@vinaystwt/xmpp-contract-runtime`
+  - `@vinaystwt/xmpp-http-interceptor`
+  - `@vinaystwt/xmpp-config`
+  - `@vinaystwt/xmpp-types`
+  - `@vinaystwt/xmpp-logger`
+
+Most builders should start with `@vinaystwt/xmpp-core` or `@vinaystwt/xmpp-mcp`. The rest are published as composable modules for advanced integrations and custom infrastructure work.
 
 Build the local workspace package surfaces:
 

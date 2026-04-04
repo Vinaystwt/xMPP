@@ -1,13 +1,14 @@
 {
   "name": "@xmpp/wallet",
-  "version": "0.1.0",
-  "description": "Wallet, receipt-signing, and execution-planning helpers for xMPP on Stellar.",
+  "version": "0.1.1",
+  "description": "Advanced wallet and receipt-signing package for xMPP execution on Stellar.",
   "type": "module",
   "license": "MIT",
   "main": "dist/wallet/src/index.js",
   "types": "dist/wallet/src/index.d.ts",
   "files": [
     "dist",
+    "README.md",
     "LICENSE"
   ],
   "sideEffects": false,
@@ -20,7 +21,7 @@
   "bugs": {
     "url": "https://github.com/Vinaystwt/xMPP/issues"
   },
-  "keywords": ["xmpp", "wallet", "stellar", "receipts", "agents"],
+  "keywords": ["xmpp", "wallet", "stellar", "receipts", "agents", "smart-account"],
   "exports": {
     ".": {
       "types": "./dist/wallet/src/index.d.ts",

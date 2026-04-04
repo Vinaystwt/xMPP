@@ -1,12 +1,12 @@
 {
   "name": "@xmpp/policy-engine",
-  "version": "0.1.0",
-  "description": "Service, budget, agent, and contract-aware policy evaluation for xMPP.",
+  "version": "0.1.1",
+  "description": "Advanced xMPP policy evaluation package for service, agent, treasury, and contract-aware decisions.",
   "type": "module",
   "license": "MIT",
   "main": "dist/policy-engine/src/index.js",
   "types": "dist/policy-engine/src/index.d.ts",
-  "files": ["dist", "LICENSE"],
+  "files": ["dist", "README.md", "LICENSE"],
   "sideEffects": false,
   "homepage": "https://github.com/Vinaystwt/xMPP#readme",
   "repository": {
@@ -17,7 +17,7 @@
   "bugs": {
     "url": "https://github.com/Vinaystwt/xMPP/issues"
   },
-  "keywords": ["xmpp", "policy", "stellar", "agents"],
+  "keywords": ["xmpp", "policy", "stellar", "agents", "budgets", "treasury"],
   "exports": {
     ".": {
       "types": "./dist/policy-engine/src/index.d.ts",
