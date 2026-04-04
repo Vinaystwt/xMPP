@@ -11,9 +11,7 @@
   <text x="176" y="326" fill="#F7FAFC" font-size="20" font-family="Arial, sans-serif">stream-api</text>
   <text x="96" y="368" fill="#F7FAFC" font-size="20" font-family="Arial, sans-serif">Cost:</text>
   <text x="176" y="368" fill="#F7FAFC" font-size="20" font-family="Arial, sans-serif">$0.01</text>
-  <text x="96" y="410" fill="#F7FAFC" font-size="20" font-family="Arial, sans-serif">Gas model:</text>
-  <text x="176" y="410" fill="#F7FAFC" font-size="20" font-family="Arial, sans-serif">service-sponsored</text>
-  <text x="96" y="470" fill="#9FB2C8" font-size="18" font-family="Arial, sans-serif">First call creates the session.</text>
+  <text x="96" y="410" fill="#F7FAFC" font-size="20" font-family="Arial, sans-serif">Gas: service-sponsored</text>
 
   <rect x="400" y="180" width="280" height="420" rx="24" fill="#13243A" stroke="#203652"/>
   <text x="432" y="232" fill="#93C5FD" font-size="26" font-family="Arial, sans-serif" font-weight="700">2. Session Reuse</text>
@@ -23,7 +21,6 @@
   <text x="512" y="326" fill="#F7FAFC" font-size="20" font-family="Arial, sans-serif">$0.005</text>
   <text x="432" y="368" fill="#F7FAFC" font-size="20" font-family="Arial, sans-serif">Call count:</text>
   <text x="512" y="368" fill="#F7FAFC" font-size="20" font-family="Arial, sans-serif">2 in latest smoke</text>
-  <text x="432" y="470" fill="#9FB2C8" font-size="18" font-family="Arial, sans-serif">Later calls reuse it cheaply.</text>
 
   <rect x="736" y="180" width="312" height="420" rx="24" fill="#13243A" stroke="#203652"/>
   <text x="768" y="232" fill="#86EFAC" font-size="26" font-family="Arial, sans-serif" font-weight="700">3. On-Chain Evidence</text>
