@@ -70,7 +70,6 @@ Latest verified smoke run:
 
 Savings compound across thousands of agent calls per hour.
 
-![MPP Session Lifecycle](./assets/mpp-lifecycle.svg)
 
 ---
 
