@@ -6,6 +6,7 @@ import { ExactStellarScheme } from '@x402/stellar/exact/facilitator'
 import { createEd25519Signer } from '@x402/stellar'
 import { config } from '@xmpp/config'
 import { logger } from '@xmpp/logger'
+import { getEffectiveSmartAccountFeeCeiling } from '../../../packages/wallet/src/index.js'
 
 export function createFacilitatorApp(): express.Express {
   const app = express()
@@ -25,6 +26,7 @@ export function createFacilitatorApp(): express.Express {
       {
         rpcConfig: { url: config.rpcUrl },
         areFeesSponsored: true,
+        maxTransactionFeeStroops: getEffectiveSmartAccountFeeCeiling(),
       },
     ),
   )
@@ -35,6 +37,8 @@ export function createFacilitatorApp(): express.Express {
       service: 'xmpp-facilitator',
       network: config.network,
       rpcUrl: config.rpcUrl,
+      configuredMaxTransactionFeeStroops: config.x402.maxTransactionFeeStroops,
+      effectiveMaxTransactionFeeStroops: getEffectiveSmartAccountFeeCeiling(),
     })
   })
 

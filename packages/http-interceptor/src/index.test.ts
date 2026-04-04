@@ -1,10 +1,15 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
-import { getXmppMetadata, resetXmppOperatorState, xmppFetch } from './index.js'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import * as paymentAdapters from '@xmpp/payment-adapters'
+import { getXmppMetadata, resetXmppRuntimeState, xmppFetch } from './index.js'
 
 describe('xmppFetch', () => {
+  beforeEach(() => {
+    resetXmppRuntimeState()
+  })
+
   afterEach(() => {
     vi.restoreAllMocks()
-    resetXmppOperatorState()
+    resetXmppRuntimeState()
   })
 
   it('retries after a 402 payment challenge', async () => {
@@ -103,5 +108,57 @@ describe('xmppFetch', () => {
     expect(body.error).toContain('agent policy denied')
     expect(metadata?.policy?.code).toBe('blocked-agent')
     expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('opens then reuses a session in testnet mode and clears it on runtime reset', async () => {
+    process.env.XMPP_PAYMENT_EXECUTION_MODE = 'testnet'
+    process.env.XMPP_AGENT_SECRET_KEY =
+      'SDJ5L6UNCSFK5L2AUIIRVIE7KW4HAZ6N7P2KQ6CUPT5KUG6J6LYW7CLW'
+    process.env.MPP_SECRET_KEY =
+      'SB5Y5P5ONLTHYBUFSUWPG4KSTC35DEYKM3NOMFEML3A5FC4T5TXV6H3V'
+    process.env.MPP_CHANNEL_CONTRACT_ID =
+      'CDCMWMSCRL2HR5YZLMFKLWR5DEPTAEOOLKBXYLQ2MK4FBPUOVUP72E3A'
+
+    const executePaymentRoute = vi
+      .spyOn(paymentAdapters, 'executePaymentRoute')
+      .mockImplementation(async (route) => ({
+        response: new Response(JSON.stringify({ ok: true, route }), { status: 200 }),
+        metadata: {
+          mode: 'testnet',
+          status: 'settled-testnet',
+          route,
+          receiptId: `receipt-${route}`,
+        },
+      }))
+
+    const input = 'http://localhost:4103/stream/tick'
+    const options = {
+      agentId: 'market-agent',
+      serviceId: 'stream-api',
+      projectedRequests: 5,
+      streaming: true,
+    } as const
+
+    const first = await xmppFetch(input, { method: 'GET' }, options)
+    const firstMetadata = getXmppMetadata(first)
+    const second = await xmppFetch(input, { method: 'GET' }, options)
+    const secondMetadata = getXmppMetadata(second)
+
+    expect(firstMetadata?.route).toBe('mpp-session-open')
+    expect(firstMetadata?.execution?.route).toBe('mpp-session-open')
+    expect(secondMetadata?.route).toBe('mpp-session-reuse')
+    expect(secondMetadata?.execution?.route).toBe('mpp-session-reuse')
+    expect(executePaymentRoute.mock.calls.map(([route]) => route)).toEqual([
+      'mpp-session-open',
+      'mpp-session-reuse',
+    ])
+
+    resetXmppRuntimeState()
+
+    const afterReset = await xmppFetch(input, { method: 'GET' }, options)
+    const resetMetadata = getXmppMetadata(afterReset)
+
+    expect(resetMetadata?.route).toBe('mpp-session-open')
+    expect(resetMetadata?.execution?.route).toBe('mpp-session-open')
   })
 })

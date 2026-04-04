@@ -23,6 +23,9 @@ importers:
       prettier:
         specifier: ^3.8.1
         version: 3.8.1
+      smart-account-kit-bindings:
+        specifier: 0.1.2
+        version: 0.1.2(@stellar/stellar-sdk@15.0.1)
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -3866,6 +3869,11 @@ snapshots:
   smart-account-kit-bindings@0.1.2(@stellar/stellar-sdk@14.6.1):
     dependencies:
       '@stellar/stellar-sdk': 14.6.1
+      buffer: 6.0.3
+
+  smart-account-kit-bindings@0.1.2(@stellar/stellar-sdk@15.0.1):
+    dependencies:
+      '@stellar/stellar-sdk': 15.0.1
       buffer: 6.0.3
 
   smart-account-kit@0.2.10(@stellar/stellar-sdk@14.6.1):

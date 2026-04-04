@@ -1,6 +1,10 @@
 import type { Server } from 'node:http'
+import { spawn } from 'node:child_process'
 import { setTimeout as delay } from 'node:timers/promises'
+import { resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { createGatewayApp } from '../apps/gateway/src/app.js'
+import { resetXmppRuntimeState } from '../packages/http-interceptor/dist/http-interceptor/src/index.js'
 import {
   createMarketApp,
   createResearchApp,
@@ -8,6 +12,8 @@ import {
 } from '../apps/demo-services/src/index.js'
 import { createFacilitatorApp } from '../apps/facilitator/src/index.js'
 import { config } from '../packages/config/src/index.js'
+
+const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
 
 type GatewayFetchResult = {
   status: number
@@ -50,6 +56,12 @@ type GatewayFetchResult = {
 type GatewayHealth = {
   ok: boolean
   paymentExecutionMode: 'mock' | 'testnet'
+  smartAccount?: {
+    configured: boolean
+    x402Preferred: boolean
+    mppFallback: boolean
+    demoReady: boolean
+  }
 }
 
 type OperatorState = {
@@ -66,13 +78,18 @@ async function main() {
   const servers: Server[] = []
 
   try {
+    resetXmppRuntimeState()
+    await resetContractStateForSmoke()
     servers.push(await listen(createFacilitatorApp(), portOf(config.x402.facilitatorUrl)))
     servers.push(await listen(createResearchApp(), portOf(config.services.research)))
     servers.push(await listen(createMarketApp(), portOf(config.services.market)))
     servers.push(await listen(createStreamApp(), portOf(config.services.stream)))
     servers.push(await listen(createGatewayApp(), config.gatewayPort))
 
-    await delay(250)
+    await waitForUrlReady(config.services.research)
+    await waitForUrlReady(config.services.market)
+    await waitForUrlReady(config.services.stream)
+    await waitForUrlReady(`http://localhost:${config.gatewayPort}/health`)
 
     const health = await getJson<GatewayHealth>(`http://localhost:${config.gatewayPort}/health`)
     const wallet = await getJson(`http://localhost:${config.gatewayPort}/wallet`)
@@ -152,6 +169,28 @@ async function main() {
   }
 }
 
+async function resetContractStateForSmoke() {
+  if (!config.contracts.policyContractId) {
+    return
+  }
+
+  await new Promise<void>((resolvePromise, rejectPromise) => {
+    const child = spawn('pnpm', ['exec', 'tsx', 'contracts/scripts/seed-testnet.ts'], {
+      cwd: repoRoot,
+      stdio: 'inherit',
+      shell: false,
+    })
+    child.on('exit', (code) => {
+      if (code === 0) {
+        resolvePromise()
+        return
+      }
+
+      rejectPromise(new Error(`contract seed exited with ${code ?? 1}`))
+    })
+  })
+}
+
 async function gatewayFetch(payload: unknown) {
   const response = await fetch(`http://localhost:${config.gatewayPort}/fetch`, {
     method: 'POST',
@@ -165,6 +204,25 @@ async function gatewayFetch(payload: unknown) {
 async function getJson<T>(url: string) {
   const response = await fetch(url)
   return response.json() as Promise<T>
+}
+
+async function waitForUrlReady(url: string, attempts = 30) {
+  let lastError: unknown
+
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      const response = await fetch(url)
+      response.body?.cancel().catch(() => {})
+      return
+    } catch (error) {
+      lastError = error
+      await delay(250)
+    }
+  }
+
+  throw new Error(`[xMPP smoke] Timed out waiting for ${url} to become ready`, {
+    cause: lastError,
+  })
 }
 
 function listen(app: { listen: Server['listen'] }, port: number) {
@@ -263,6 +321,14 @@ function assertSmokeSummary(summary: {
     'x402 execution did not expose settlement strategy',
   )
   assert(
+    summary.flows.x402.payment.execution?.signedReceipt?.txHash,
+    'x402 execution did not attach a signed receipt with tx hash evidence',
+  )
+  assert(
+    summary.flows.x402.payment.execution?.signedReceipt?.explorerUrl,
+    'x402 execution did not attach a signed receipt with explorer evidence',
+  )
+  assert(
     summary.flows.charge.payment.execution?.settlementStrategy,
     'MPP charge execution did not expose settlement strategy',
   )
@@ -303,6 +369,41 @@ function assertSmokeSummary(summary: {
     assertSettled(summary.flows.charge, 'mpp-charge')
     assertSettled(summary.flows.sessionOpen, 'mpp-session-open')
     assertSettled(summary.flows.sessionReuse, 'mpp-session-reuse')
+  }
+
+  if (config.wallet.smartAccountContractId) {
+    assert(
+      summary.health.smartAccount?.demoReady === true,
+      'Gateway health did not report smart-account demo readiness when configured',
+    )
+    assert(
+      summary.health.smartAccount?.mppFallback === true,
+      'Gateway health did not report MPP fallback when smart-account mode is configured',
+    )
+    assert(
+      summary.wallet?.smartAccount?.ready === true,
+      'Wallet did not report smart-account readiness when contract id is configured',
+    )
+    assert(
+      summary.flows.x402.payment.execution?.settlementStrategy === 'smart-account',
+      'x402 did not switch to smart-account settlement when configured',
+    )
+    assert(
+      summary.flows.x402.payment.execution?.smartAccount?.used === true,
+      'x402 execution metadata did not report smart-account usage',
+    )
+    assert(
+      summary.wallet?.smartAccount?.mode === 'x402-only',
+      'Wallet did not report x402-only smart-account mode',
+    )
+    assert(
+      summary.wallet?.smartAccount?.supportedRoutes?.includes('x402'),
+      'Wallet did not report x402 as a supported smart-account route',
+    )
+    assert(
+      summary.wallet?.smartAccount?.unsupportedRoutes?.includes('mpp-charge'),
+      'Wallet did not report MPP charge as unsupported for smart-account execution',
+    )
   }
 }
 

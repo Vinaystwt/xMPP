@@ -9,6 +9,7 @@ import { registerPolicyRoutes } from './routes/policy.js'
 import { registerReceiptRoutes } from './routes/receipts.js'
 import { registerStateRoutes } from './routes/state.js'
 import { registerWalletRoute } from './routes/wallet.js'
+import { gatewayErrorHandler } from './middleware/error-handler.js'
 
 const pinoHttp = (pinoHttpModule as unknown as typeof import('pino-http').default)
 
@@ -24,6 +25,7 @@ export function createGatewayApp(): Express {
   registerReceiptRoutes(app)
   registerPolicyRoutes(app)
   registerFetchRoute(app)
+  app.use(gatewayErrorHandler)
 
   return app
 }

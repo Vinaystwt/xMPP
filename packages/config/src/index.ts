@@ -38,6 +38,7 @@ const envSchema = z.object({
     .default('CDDQLFG7CV74QHWPSP6NZIPNBR2PPCMTUVYCJF4P3ONDYHODRFGR7LWC'),
   X402_FACILITATOR_URL: z.string().default('http://localhost:4022'),
   X402_FACILITATOR_API_KEY: z.string().optional(),
+  X402_MAX_TRANSACTION_FEE_STROOPS: z.coerce.number().default(2000000),
   X402_RECIPIENT_ADDRESS: z.string().optional(),
   FACILITATOR_STELLAR_PRIVATE_KEY: z.string().optional(),
   MPP_SECRET_KEY: z.string().optional(),
@@ -93,6 +94,7 @@ export const config = {
   x402: {
     facilitatorUrl: env.X402_FACILITATOR_URL,
     facilitatorApiKey: env.X402_FACILITATOR_API_KEY,
+    maxTransactionFeeStroops: env.X402_MAX_TRANSACTION_FEE_STROOPS,
     facilitatorPrivateKey: env.FACILITATOR_STELLAR_PRIVATE_KEY,
     recipientAddress: env.X402_RECIPIENT_ADDRESS,
   },

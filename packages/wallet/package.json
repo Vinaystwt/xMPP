@@ -36,7 +36,7 @@
     "dev": "tsc -p tsconfig.json --watch",
     "lint": "eslint src",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run src --passWithNoTests"
   },
   "dependencies": {
     "@stellar/stellar-sdk": "^14.6.1",

@@ -82,7 +82,14 @@ export function getXmppMetadata(resp: Response): XmppFetchMetadata | undefined {
   return (resp as Response & { __xmpp?: XmppFetchMetadata }).__xmpp
 }
 
-export { getXmppOperatorState, listLocalSessions, listXmppAgentProfiles, resetXmppOperatorState }
+export { getXmppOperatorState, listLocalSessions, listXmppAgentProfiles }
+
+export function resetXmppRuntimeState() {
+  sessionRegistry.clear()
+  resetXmppOperatorState()
+}
+
+export { resetXmppRuntimeState as resetXmppOperatorState }
 
 function withLocalAgentDefaults(agent: XmppAgentProfile) {
   return {
@@ -201,6 +208,38 @@ function extractPaymentReference(evidenceHeaders?: Record<string, string>) {
     return paymentReceipt.reference
   }
   return undefined
+}
+
+function getBooleanHeader(headers: Headers, name: string) {
+  const value = headers.get(name)
+  if (value == null) {
+    return undefined
+  }
+
+  return value.toLowerCase() === 'true'
+}
+
+function extractEvidenceHeaders(headers: Headers): Record<string, string> | undefined {
+  const evidenceEntries: Array<[string, string]> = []
+  headers.forEach((value, key) => {
+    const normalized = key.toLowerCase()
+    if (
+      normalized.startsWith('x-payment') ||
+      normalized.startsWith('x-mpp') ||
+      normalized.startsWith('x-xmpp-') ||
+      normalized.includes('receipt') ||
+      normalized.includes('transaction') ||
+      normalized === 'payment-response'
+    ) {
+      evidenceEntries.push([key, value])
+    }
+  })
+
+  if (evidenceEntries.length === 0) {
+    return undefined
+  }
+
+  return Object.fromEntries(evidenceEntries)
 }
 
 function attachSignedReceipt(input: {
@@ -580,8 +619,9 @@ export async function xmppFetch(
   ) {
     const sessionKey = `${options?.serviceId ?? url}:${url}`
     const existingSession = sessionRegistry.get(sessionKey)
+    const hasReusableSession = Boolean(existingSession?.callCount)
     const liveRoute =
-      preview.route === 'mpp-session-open' && existingSession
+      preview.route === 'mpp-session-open' && hasReusableSession
         ? 'mpp-session-reuse'
         : preview.route
     const liveAmountUsd = estimateRouteCost({
@@ -590,7 +630,7 @@ export async function xmppFetch(
       method,
       serviceId: options?.serviceId ?? preview.service?.serviceId,
       projectedRequests: 1,
-      hasReusableSession: Boolean(existingSession),
+      hasReusableSession,
     })
     const spendPolicy = await evaluateSpendPolicy({
       agent,
@@ -635,7 +675,7 @@ export async function xmppFetch(
           serviceId: options?.serviceId ?? preview.service?.serviceId,
           route: liveRoute,
           projectedRequests: options?.projectedRequests,
-          hasReusableSession: Boolean(existingSession),
+          hasReusableSession,
         }),
       })
     }
@@ -709,7 +749,7 @@ export async function xmppFetch(
           serviceId: options?.serviceId ?? preview.service?.serviceId,
           route: liveRoute,
           projectedRequests: options?.projectedRequests,
-          hasReusableSession: Boolean(existingSession),
+          hasReusableSession,
         }),
       }
       if (idempotency.idempotencyKey && idempotency.fingerprint) {
@@ -741,7 +781,7 @@ export async function xmppFetch(
         serviceId: options?.serviceId ?? preview.service?.serviceId,
         route: liveRoute,
         projectedRequests: options?.projectedRequests,
-        hasReusableSession: Boolean(existingSession),
+        hasReusableSession,
       }),
     })
   }
@@ -828,6 +868,8 @@ export async function xmppFetch(
   }
 
   const sessionKey = `${challenge.service}:${url}`
+  const existingSession = sessionRegistry.get(sessionKey)
+  const hasReusableSession = Boolean(existingSession?.callCount)
   const decision = await router.chooseFromChallenge({
     url,
     method,
@@ -835,7 +877,7 @@ export async function xmppFetch(
     projectedRequests: options?.projectedRequests,
     streaming: options?.streaming,
     challenge,
-    hasReusableSession: sessionRegistry.has(sessionKey),
+    hasReusableSession,
   })
 
   const payment = preparePaymentExecution(challenge, decision.route)
@@ -895,7 +937,7 @@ export async function xmppFetch(
         serviceId: challenge.service,
         route: decision.route,
         projectedRequests: options?.projectedRequests,
-        hasReusableSession: decision.route === 'mpp-session-reuse',
+        hasReusableSession: hasReusableSession || decision.route === 'mpp-session-reuse',
       }),
     })
   }
@@ -905,25 +947,33 @@ export async function xmppFetch(
     retryHeaders.set(key, value)
   }
 
-  if (decision.route === 'mpp-session-open' || decision.route === 'mpp-session-reuse') {
-    const existingSession = sessionRegistry.get(sessionKey)
-    const nextSession = {
-      sessionId: challenge.sessionId ?? existingSession?.sessionId ?? sessionKey,
-      callCount: decision.route === 'mpp-session-open' ? 1 : (existingSession?.callCount ?? 0) + 1,
-    }
-    sessionRegistry.set(sessionKey, nextSession)
-    upsertLocalSession(nextSession.sessionId, challenge.service, nextSession.callCount)
-  }
-
   const retried = await fetch(url, {
     ...init,
     headers: retryHeaders,
   })
 
   if (retried.status < 400) {
-    const currentSession = sessionRegistry.get(sessionKey)
+    let currentSession = existingSession
+    if (decision.route === 'mpp-session-open' || decision.route === 'mpp-session-reuse') {
+      const nextSession = {
+        sessionId: challenge.sessionId ?? existingSession?.sessionId ?? sessionKey,
+        callCount:
+          decision.route === 'mpp-session-open' ? 1 : (existingSession?.callCount ?? 0) + 1,
+      }
+      sessionRegistry.set(sessionKey, nextSession)
+      upsertLocalSession(nextSession.sessionId, challenge.service, nextSession.callCount)
+      currentSession = nextSession
+    }
+    const evidenceHeaders = extractEvidenceHeaders(retried.headers)
     const execution = attachSignedReceipt({
-      metadata: payment.metadata,
+      metadata: {
+        ...payment.metadata,
+        status: 'settled-testnet',
+        evidenceHeaders,
+        feeSponsored: getBooleanHeader(retried.headers, 'x-xmpp-fee-sponsored'),
+        feeSponsorPublicKey: retried.headers.get('x-xmpp-fee-sponsor') ?? undefined,
+        feeBumpPublicKey: retried.headers.get('x-xmpp-fee-bump-sponsor') ?? undefined,
+      },
       url,
       method,
       serviceId: challenge.service,
@@ -943,7 +993,7 @@ export async function xmppFetch(
         method,
         serviceId: challenge.service,
         projectedRequests: 1,
-        hasReusableSession: decision.route === 'mpp-session-reuse',
+        hasReusableSession: hasReusableSession || decision.route === 'mpp-session-reuse',
       }),
       projectedRequests: options?.projectedRequests ?? 1,
       receiptId: execution?.receiptId ?? payment.metadata.receiptId,
@@ -968,7 +1018,7 @@ export async function xmppFetch(
         serviceId: challenge.service,
         route: decision.route,
         projectedRequests: options?.projectedRequests,
-        hasReusableSession: decision.route === 'mpp-session-reuse',
+        hasReusableSession: hasReusableSession || decision.route === 'mpp-session-reuse',
       }),
     }
     if (idempotency.idempotencyKey && idempotency.fingerprint) {
@@ -1001,7 +1051,7 @@ export async function xmppFetch(
       serviceId: challenge.service,
       route: decision.route,
       projectedRequests: options?.projectedRequests,
-      hasReusableSession: decision.route === 'mpp-session-reuse',
+      hasReusableSession: hasReusableSession || decision.route === 'mpp-session-reuse',
     }),
   })
 }

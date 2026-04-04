@@ -16,7 +16,9 @@ const envPath = resolve(repoRoot, '.env')
 const envLocalPath = resolve(repoRoot, '.env.local')
 const shouldFund = process.argv.includes('--friendbot')
 const shouldDeployContracts = process.argv.includes('--contracts')
+const shouldSeedContracts = process.argv.includes('--seed-contracts')
 const shouldGenerateFeeSponsor = process.argv.includes('--fee-sponsor')
+const shouldBootstrapSmartAccount = process.argv.includes('--smart-account')
 const dryRun = process.argv.includes('--dry-run')
 
 function parseEnv(text: string) {
@@ -115,10 +117,55 @@ async function seedContracts() {
   })
 }
 
+async function bootstrapSmartAccount() {
+  await new Promise<void>((resolvePromise, rejectPromise) => {
+    const args = ['exec', 'tsx', 'scripts/bootstrap-smart-account.ts']
+    if (dryRun) {
+      args.push('--dry-run')
+    }
+
+    const child = spawn('pnpm', args, {
+      cwd: repoRoot,
+      stdio: 'inherit',
+      shell: false,
+    })
+    child.on('exit', (code) => {
+      if (code === 0) {
+        resolvePromise()
+        return
+      }
+      rejectPromise(new Error(`smart-account bootstrap exited with ${code ?? 1}`))
+    })
+  })
+}
+
+async function probeSmartAccount() {
+  await new Promise<void>((resolvePromise, rejectPromise) => {
+    const child = spawn('pnpm', ['exec', 'tsx', 'scripts/probe-smart-account-x402.ts'], {
+      cwd: repoRoot,
+      stdio: 'inherit',
+      shell: false,
+    })
+    child.on('exit', (code) => {
+      if (code === 0) {
+        resolvePromise()
+        return
+      }
+      rejectPromise(new Error(`smart-account probe exited with ${code ?? 1}`))
+    })
+  })
+}
+
 async function syncContractIds(env: Map<string, string>) {
-  const addresses = JSON.parse(
-    await readFile(resolve(repoRoot, 'contracts/scripts/addresses.json'), 'utf8'),
-  ) as { policyContractId?: string; sessionRegistryContractId?: string }
+  const addressesPath = resolve(repoRoot, 'contracts/scripts/addresses.json')
+  if (!existsSync(addressesPath)) {
+    return
+  }
+
+  const addresses = JSON.parse(await readFile(addressesPath, 'utf8')) as {
+    policyContractId?: string
+    sessionRegistryContractId?: string
+  }
 
   if (addresses.policyContractId) {
     env.set('XMPP_POLICY_CONTRACT_ID', addresses.policyContractId)
@@ -176,8 +223,31 @@ async function main() {
     await seedContracts()
   }
 
+  if (!dryRun && !shouldDeployContracts) {
+    await syncContractIds(env)
+    await writeEnvLocal(env)
+
+    if (
+      shouldSeedContracts ||
+      env.get('XMPP_POLICY_CONTRACT_ID') ||
+      env.get('XMPP_SESSION_REGISTRY_CONTRACT_ID')
+    ) {
+      await seedContracts()
+    }
+  }
+
+  if (shouldBootstrapSmartAccount) {
+    await bootstrapSmartAccount()
+    if (!dryRun) {
+      await probeSmartAccount()
+    }
+  }
+
   console.log('[xMPP bootstrap] next steps:')
   console.log('  pnpm check')
+  if (!env.get('XMPP_SMART_ACCOUNT_CONTRACT_ID') && !shouldBootstrapSmartAccount) {
+    console.log('  pnpm xmpp:smart-account:bootstrap')
+  }
   console.log('  pnpm xmpp:demo:smoke')
 }
 

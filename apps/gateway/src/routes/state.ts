@@ -32,6 +32,10 @@ export function registerStateRoutes(app: Express) {
     )
 
     for (const session of contractSessions) {
+      if (session.status === 'closed') {
+        continue
+      }
+
       mergedSessions.set(session.sessionId, {
         sessionId: session.sessionId,
         serviceId: session.serviceId,
@@ -66,7 +70,7 @@ export function registerStateRoutes(app: Express) {
       contractTreasury,
       contractAgentTreasuryStates,
       openSessions: [...mergedSessions.values()],
-      contractSessions,
+      contractSessions: contractSessions.filter((session) => session.status !== 'closed'),
     })
   })
 

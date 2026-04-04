@@ -1,5 +1,6 @@
 import { config } from '@xmpp/config'
-import { Keypair } from '@stellar/stellar-sdk'
+import * as StellarSdk from '@stellar/stellar-sdk'
+import { contract, hash, Keypair, nativeToScVal, rpc, TransactionBuilder, xdr } from '@stellar/stellar-sdk'
 import { basicNodeSigner } from '@stellar/stellar-sdk/contract'
 import { Mppx as MppxCharge, stellar as mppCharge } from '@stellar/mpp/charge/client'
 import { Mppx as MppxChannel, stellar as mppChannel } from '@stellar/mpp/channel/client'
@@ -17,7 +18,272 @@ import { XLM_SAC_TESTNET } from '@stellar/mpp'
 import { getRouteExecutionPlan } from '@xmpp/wallet'
 
 const stellarNetwork = config.network as 'stellar:testnet' | 'stellar:pubnet'
-const liveFetchCache = new Map<'x402' | 'mpp-charge' | 'mpp-session', typeof fetch>()
+const liveFetchCache = new Map<
+  'x402-smart-account' | 'x402-keypair' | 'mpp-charge' | 'mpp-session',
+  typeof fetch
+>()
+const DEFAULT_LEDGER_CLOSE_SECONDS = 5
+const SMART_ACCOUNT_X402_RETRY_DELAY_MS = 1500
+
+function createClassicSignatureScVal(keypair: Keypair, payload: Buffer) {
+  return xdr.ScVal.scvVec([
+    xdr.ScVal.scvMap([
+      new xdr.ScMapEntry({
+        key: xdr.ScVal.scvSymbol('public_key'),
+        val: xdr.ScVal.scvBytes(keypair.rawPublicKey()),
+      }),
+      new xdr.ScMapEntry({
+        key: xdr.ScVal.scvSymbol('signature'),
+        val: xdr.ScVal.scvBytes(keypair.sign(payload)),
+      }),
+    ]),
+  ])
+}
+
+function createDelegatedSignerScVal(publicKey: string) {
+  return xdr.ScVal.scvVec([
+    xdr.ScVal.scvSymbol('Delegated'),
+    xdr.ScVal.scvAddress(StellarSdk.Address.fromString(publicKey).toScAddress()),
+  ])
+}
+
+function createDelegatedAuthPayload(publicKey: string, contextRuleIds: number[]) {
+  return xdr.ScVal.scvMap([
+    new xdr.ScMapEntry({
+      key: xdr.ScVal.scvSymbol('context_rule_ids'),
+      val: xdr.ScVal.scvVec(contextRuleIds.map((id) => xdr.ScVal.scvU32(id))),
+    }),
+    new xdr.ScMapEntry({
+      key: xdr.ScVal.scvSymbol('signers'),
+      val: xdr.ScVal.scvMap([
+        new xdr.ScMapEntry({
+          key: createDelegatedSignerScVal(publicKey),
+          val: xdr.ScVal.scvBytes(Buffer.alloc(0)),
+        }),
+      ]),
+    }),
+  ])
+}
+
+function buildSmartAccountSignaturePayload(
+  entry: xdr.SorobanAuthorizationEntry,
+  networkPassphrase: string,
+) {
+  const credentials = entry.credentials().address()
+  return hash(
+    xdr.HashIdPreimage.envelopeTypeSorobanAuthorization(
+      new xdr.HashIdPreimageSorobanAuthorization({
+        networkId: hash(Buffer.from(networkPassphrase)),
+        nonce: credentials.nonce(),
+        invocation: entry.rootInvocation(),
+        signatureExpirationLedger: credentials.signatureExpirationLedger(),
+      }),
+    ).toXDR(),
+  )
+}
+
+function buildSmartAccountAuthDigest(signaturePayload: Buffer, contextRuleIds: number[]) {
+  const contextRuleIdsXdr = xdr.ScVal.scvVec(contextRuleIds.map((id) => xdr.ScVal.scvU32(id))).toXDR()
+  return hash(Buffer.concat([signaturePayload, contextRuleIdsXdr]))
+}
+
+function signDelegatedSmartAccountAuth(
+  authEntries: xdr.SorobanAuthorizationEntry[],
+  smartAccountContractId: string,
+  delegatedSigner: Keypair,
+  expiration: number,
+  networkPassphrase: string,
+  contextRuleIds: number[] = [0],
+) {
+  const signedAuthEntries: xdr.SorobanAuthorizationEntry[] = []
+
+  for (const entry of authEntries) {
+    const credentials = entry.credentials()
+    if (credentials.switch().name !== 'sorobanCredentialsAddress') {
+      signedAuthEntries.push(entry)
+      continue
+    }
+
+    const authAddress = StellarSdk.Address.fromScAddress(credentials.address().address()).toString()
+    if (authAddress !== smartAccountContractId) {
+      signedAuthEntries.push(entry)
+      continue
+    }
+
+    const smartAccountEntry = xdr.SorobanAuthorizationEntry.fromXDR(entry.toXDR())
+    smartAccountEntry.credentials().address().signatureExpirationLedger(expiration)
+    const authPayload = createDelegatedAuthPayload(delegatedSigner.publicKey(), contextRuleIds)
+    smartAccountEntry
+      .credentials()
+      .address()
+      .signature(authPayload)
+    signedAuthEntries.push(smartAccountEntry)
+    const signaturePayload = buildSmartAccountSignaturePayload(smartAccountEntry, networkPassphrase)
+    const authDigest = buildSmartAccountAuthDigest(signaturePayload, contextRuleIds)
+
+    const delegatedNonce = xdr.Int64.fromString(Date.now().toString())
+    const delegatedInvocation = new xdr.SorobanAuthorizedInvocation({
+      function: xdr.SorobanAuthorizedFunction.sorobanAuthorizedFunctionTypeContractFn(
+        new xdr.InvokeContractArgs({
+          contractAddress: StellarSdk.Address.fromString(smartAccountContractId).toScAddress(),
+          functionName: '__check_auth',
+          args: [xdr.ScVal.scvBytes(authDigest)],
+        }),
+      ),
+      subInvocations: [],
+    })
+
+    const delegatedPreimage = xdr.HashIdPreimage.envelopeTypeSorobanAuthorization(
+      new xdr.HashIdPreimageSorobanAuthorization({
+        networkId: hash(Buffer.from(networkPassphrase)),
+        nonce: delegatedNonce,
+        signatureExpirationLedger: expiration,
+        invocation: delegatedInvocation,
+      }),
+    )
+
+    signedAuthEntries.push(
+      new xdr.SorobanAuthorizationEntry({
+        credentials: xdr.SorobanCredentials.sorobanCredentialsAddress(
+          new xdr.SorobanAddressCredentials({
+            address: StellarSdk.Address.fromString(delegatedSigner.publicKey()).toScAddress(),
+            nonce: delegatedNonce,
+            signatureExpirationLedger: expiration,
+            signature: createClassicSignatureScVal(
+              delegatedSigner,
+              hash(delegatedPreimage.toXDR()),
+            ),
+          }),
+        ),
+        rootInvocation: delegatedInvocation,
+      }),
+    )
+  }
+
+  return signedAuthEntries
+}
+
+export const __smartAccountTestUtils = {
+  createClassicSignatureScVal,
+  createDelegatedSignerScVal,
+  createDelegatedAuthPayload,
+  buildSmartAccountSignaturePayload,
+  buildSmartAccountAuthDigest,
+  signDelegatedSmartAccountAuth,
+}
+
+class SmartAccountExactStellarScheme {
+  scheme = 'exact' as const
+
+  constructor(
+    private readonly smartAccountContractId: string,
+    private readonly delegatedSigner: Keypair,
+  ) {}
+
+  async createPaymentPayload(
+    x402Version: number,
+    paymentRequirements: {
+      scheme: string
+      network: string
+      payTo: string
+      asset: string
+      amount: string
+      maxTimeoutSeconds: number
+      extra: { areFeesSponsored?: boolean }
+    },
+  ) {
+    const { scheme, network, payTo, asset, amount, maxTimeoutSeconds, extra } = paymentRequirements
+
+    if (scheme !== 'exact') {
+      throw new Error(`Unsupported Stellar payment scheme: ${scheme}`)
+    }
+
+    if (network !== stellarNetwork) {
+      throw new Error(`Unsupported Stellar network for smart-account exact payments: ${network}`)
+    }
+
+    if (!extra.areFeesSponsored) {
+      throw new Error('Exact scheme requires areFeesSponsored to be true')
+    }
+
+    const rpcServer = new rpc.Server(config.rpcUrl)
+    const latestLedger = await rpcServer.getLatestLedger()
+    const maxLedger =
+      latestLedger.sequence + Math.ceil(maxTimeoutSeconds / DEFAULT_LEDGER_CLOSE_SECONDS)
+
+    const tx = await contract.AssembledTransaction.build({
+      contractId: asset,
+      method: 'transfer',
+      args: [
+        nativeToScVal(this.smartAccountContractId, { type: 'address' }),
+        nativeToScVal(payTo, { type: 'address' }),
+        nativeToScVal(amount, { type: 'i128' }),
+      ],
+      networkPassphrase: config.networkPassphrase,
+      rpcUrl: config.rpcUrl,
+      parseResultXdr: (result) => result,
+    })
+
+    this.ensureSimulationSucceeded(tx.simulation)
+
+    const missingSigners = tx.needsNonInvokerSigningBy()
+    if (!missingSigners.includes(this.smartAccountContractId) || missingSigners.length > 1) {
+      throw new Error(
+        `Expected to sign with [${this.smartAccountContractId}], but got [${missingSigners.join(', ')}]`,
+      )
+    }
+
+    const builtTx = tx.built as any
+    const operationXdr = builtTx?._tx.operations()[0]
+    if (!operationXdr) {
+      throw new Error('Expected an invokeHostFunction operation for smart-account exact payments.')
+    }
+
+    const signedAuthEntries = signDelegatedSmartAccountAuth(
+      operationXdr.body().invokeHostFunctionOp().auth() ?? [],
+      this.smartAccountContractId,
+      this.delegatedSigner,
+      maxLedger,
+      config.networkPassphrase,
+    )
+    const signedOperationXdr = xdr.Operation.fromXDR(operationXdr.toXDR())
+    signedOperationXdr.body().invokeHostFunctionOp().auth(signedAuthEntries)
+
+    const signedBuilder = TransactionBuilder.cloneFrom(builtTx, {
+      networkPassphrase: config.networkPassphrase,
+    } as any)
+    signedBuilder.clearOperations()
+    signedBuilder.addOperation(signedOperationXdr)
+    const signedTx = signedBuilder.build()
+
+    const resimulation = await rpcServer.simulateTransaction(signedTx)
+    this.ensureSimulationSucceeded(resimulation)
+    const preparedTx = rpc.assembleTransaction(signedTx, resimulation).build()
+
+    return {
+      x402Version,
+      payload: {
+        transaction: preparedTx.toXDR(),
+      },
+    }
+  }
+
+  private ensureSimulationSucceeded(simulation: any) {
+    if (!simulation) {
+      throw new Error('Simulation result is undefined')
+    }
+
+    if (rpc.Api.isSimulationRestore(simulation)) {
+      throw new Error(`Stellar simulation requested restore: ${simulation.restorePreamble}`)
+    }
+
+    if (rpc.Api.isSimulationError(simulation)) {
+      throw new Error(
+        `Stellar simulation failed${simulation.error ? ` with error message: ${simulation.error}` : ''}`,
+      )
+    }
+  }
+}
 
 export function buildRetryHeaders(challenge: PaymentChallenge, route: RouteKind) {
   return {
@@ -112,15 +378,17 @@ function getAgentSecretKey() {
   return config.wallet.agentSecretKey
 }
 
-function createX402ClientSigner(): ClientStellarSigner {
-  const executionPlan = getRouteExecutionPlan('x402')
-  if (executionPlan.smartAccount.used && config.wallet.smartAccountContractId) {
+function createX402ClientSigner(preferSmartAccount: boolean): ClientStellarSigner {
+  if (preferSmartAccount && config.wallet.smartAccountContractId) {
     const keypair = Keypair.fromSecret(getAgentSecretKey())
     const signer = basicNodeSigner(keypair, config.networkPassphrase)
 
     return {
       address: config.wallet.smartAccountContractId,
-      signAuthEntry: signer.signAuthEntry,
+      signAuthEntry: async (authEntry) => ({
+        signedAuthEntry: keypair.sign(hash(Buffer.from(authEntry, 'base64'))).toString('base64'),
+        signerAddress: config.wallet.smartAccountContractId as string,
+      }),
       signTransaction: signer.signTransaction,
     }
   }
@@ -128,23 +396,35 @@ function createX402ClientSigner(): ClientStellarSigner {
   return createEd25519Signer(getAgentSecretKey(), stellarNetwork)
 }
 
-function getLiveFetchForRoute(route: RouteKind) {
+function createX402Scheme(preferSmartAccount: boolean) {
+  if (preferSmartAccount && config.wallet.smartAccountContractId) {
+    return new SmartAccountExactStellarScheme(
+      config.wallet.smartAccountContractId,
+      Keypair.fromSecret(getAgentSecretKey()),
+    )
+  }
+
+  return new ExactStellarScheme(createX402ClientSigner(false), { url: config.rpcUrl })
+}
+
+function getLiveFetchForRoute(route: RouteKind, options?: { preferSmartAccount?: boolean }) {
   if (route === 'x402') {
-    const cached = liveFetchCache.get('x402')
+    const cacheKey =
+      options?.preferSmartAccount === false ? 'x402-keypair' : 'x402-smart-account'
+    const cached = liveFetchCache.get(cacheKey)
     if (cached) {
       return cached
     }
 
-    const signer = createX402ClientSigner()
     const paidFetch = wrapFetchWithPaymentFromConfig(globalThis.fetch, {
       schemes: [
         {
           network: 'stellar:*',
-          client: new ExactStellarScheme(signer, { url: config.rpcUrl }),
+          client: createX402Scheme(options?.preferSmartAccount !== false),
         },
       ],
     })
-    liveFetchCache.set('x402', paidFetch)
+    liveFetchCache.set(cacheKey, paidFetch)
     return paidFetch
   }
 
@@ -206,6 +486,30 @@ function createExecutionMetadata(route: RouteKind): PaymentExecutionMetadata {
   }
 }
 
+function createSmartAccountFallbackMetadata(
+  metadata: PaymentExecutionMetadata,
+  error: unknown,
+): PaymentExecutionMetadata {
+  const fallbackReason =
+    error instanceof Error && error.message
+      ? `Smart-account x402 failed and xMPP fell back to keypair settlement: ${error.message}`
+      : 'Smart-account x402 failed and xMPP fell back to keypair settlement.'
+
+  return {
+    ...metadata,
+    settlementStrategy: 'keypair-fallback',
+    executionNote:
+      'x402 automatically fell back to the stable keypair path after a smart-account execution failure.',
+    smartAccount: metadata.smartAccount
+      ? {
+          ...metadata.smartAccount,
+          used: false,
+          fallbackReason,
+        }
+      : undefined,
+  }
+}
+
 function extractEvidenceHeaders(headers: Headers): Record<string, string> | undefined {
   const evidenceEntries: Array<[string, string]> = []
   headers.forEach((value, key) => {
@@ -215,6 +519,7 @@ function extractEvidenceHeaders(headers: Headers): Record<string, string> | unde
       normalized.startsWith('x-mpp') ||
       normalized.startsWith('x-xmpp-') ||
       normalized.includes('receipt') ||
+      normalized === 'payment-response' ||
       normalized.includes('transaction')
     ) {
       evidenceEntries.push([key, value])
@@ -235,6 +540,15 @@ function getBooleanHeader(headers: Headers, name: string) {
   }
 
   return value.toLowerCase() === 'true'
+}
+
+async function retrySmartAccountX402Fetch(
+  input: RequestInfo | URL,
+  init: RequestInit | undefined,
+  paidFetch: typeof fetch,
+) {
+  await new Promise((resolve) => setTimeout(resolve, SMART_ACCOUNT_X402_RETRY_DELAY_MS))
+  return paidFetch(input, init)
 }
 
 export async function executePaymentRoute(
@@ -285,14 +599,45 @@ export async function executePaymentRoute(
   const paidFetch = getLiveFetchForRoute(route)
   const liveHeaders = new Headers(init?.headers)
   liveHeaders.set('x-xmpp-route', route)
-  const response = await paidFetch(input, {
+  const liveInit = {
     ...init,
     headers: liveHeaders,
-  })
+  }
+  let response: Response
+  let finalMetadata = metadata
+
+  try {
+    response = await paidFetch(input, liveInit)
+  } catch (error) {
+    if (route !== 'x402' || !metadata.smartAccount?.used) {
+      throw error
+    }
+
+    try {
+      response = await retrySmartAccountX402Fetch(input, liveInit, paidFetch)
+    } catch {
+      finalMetadata = createSmartAccountFallbackMetadata(metadata, error)
+      response = await getLiveFetchForRoute('x402', { preferSmartAccount: false })(input, liveInit)
+    }
+  }
+
+  if (route === 'x402' && metadata.smartAccount?.used && response.status === 402) {
+    const retryResponse = await retrySmartAccountX402Fetch(input, liveInit, paidFetch)
+    if (retryResponse.status !== 402) {
+      response = retryResponse
+    } else {
+      finalMetadata = createSmartAccountFallbackMetadata(
+        metadata,
+        new Error('Smart-account x402 returned an unresolved 402 challenge.'),
+      )
+      response = await getLiveFetchForRoute('x402', { preferSmartAccount: false })(input, liveInit)
+    }
+  }
+
   const headers = new Headers(response.headers)
   const evidenceHeaders = extractEvidenceHeaders(headers)
-  const finalMetadata: PaymentExecutionMetadata = {
-    ...metadata,
+  finalMetadata = {
+    ...finalMetadata,
     status: response.status === 402 ? metadata.status : 'settled-testnet',
     evidenceHeaders,
     feeSponsored: getBooleanHeader(headers, 'x-xmpp-fee-sponsored'),

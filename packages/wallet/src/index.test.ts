@@ -2,14 +2,38 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { Keypair } from '@stellar/stellar-sdk'
 import type { XmppSignedReceipt } from '@xmpp/types'
 
-async function loadWalletModule(secret?: string, smartAccountContractId?: string) {
+async function loadWalletModule(
+  secret?: string,
+  smartAccountContractId?: string,
+  maxTransactionFeeStroops = 2_000_000,
+) {
   vi.resetModules()
   vi.doMock('@xmpp/config', () => ({
     config: {
+      paymentExecutionMode: 'testnet',
+      rpcUrl: 'https://soroban-testnet.stellar.org',
       network: 'stellar:testnet',
+      x402: {
+        facilitatorPrivateKey: 'SFACILITATOR',
+        maxTransactionFeeStroops,
+      },
+      mpp: {
+        secretKey: undefined,
+        feeSponsorSecretKey: undefined,
+        feeBumpSecretKey: undefined,
+        feeSponsorship: {
+          chargeEnabled: false,
+          sessionEnabled: false,
+        },
+      },
       wallet: {
         agentSecretKey: secret,
         smartAccountContractId,
+        smartAccountWasmHash: 'wasm-hash',
+        webauthnVerifierAddress: 'CWEBAUTHN',
+        ed25519VerifierAddress: 'CED25519',
+        spendingLimitPolicyAddress: 'CSPEND',
+        thresholdPolicyAddress: 'CTHRESH',
       },
     },
   }))
@@ -65,7 +89,7 @@ describe('wallet receipt signing', () => {
 
   it('prefers smart-account execution for x402 when configured', async () => {
     const secret = Keypair.random().secret()
-    const { getRouteExecutionPlan } = await loadWalletModule(secret, 'CSMARTACCOUNT')
+    const { getRouteExecutionPlan, getWalletInfo } = await loadWalletModule(secret, 'CSMARTACCOUNT')
 
     expect(getRouteExecutionPlan('x402')).toMatchObject({
       settlementStrategy: 'smart-account',
@@ -81,6 +105,62 @@ describe('wallet receipt signing', () => {
         configured: true,
         supported: false,
         used: false,
+      },
+    })
+
+    await expect(getWalletInfo()).resolves.toMatchObject({
+      settlementStrategy: 'smart-account-x402-preferred',
+      smartAccount: {
+        ready: true,
+        mode: 'x402-only',
+        routeCoverage: 'x402-only',
+        demoReady: true,
+        guardedFallback: true,
+        preferredRoutes: ['x402'],
+        fallbackRoutes: ['mpp-charge', 'mpp-session-open', 'mpp-session-reuse'],
+        supportedRoutes: ['x402'],
+        unsupportedRoutes: ['mpp-charge', 'mpp-session-open', 'mpp-session-reuse'],
+        unsupportedReason:
+          'MPP charge and MPP session routes still require explicit Keypair signers in the current client stack.',
+        feeFloorApplied: false,
+        preflightFailures: [],
+      },
+    })
+  })
+
+  it('exposes honest smart-account fallback messaging when only the contract id is configured', async () => {
+    const { getWalletInfo } = await loadWalletModule(undefined, 'CSMARTACCOUNT')
+
+    await expect(getWalletInfo()).resolves.toMatchObject({
+      settlementStrategy: 'smart-account-partial-fallback',
+      smartAccount: {
+        ready: true,
+        mode: 'x402-only',
+        routeCoverage: 'x402-only',
+        demoReady: false,
+        guardedFallback: true,
+        preflightFailures: ['XMPP_AGENT_SECRET_KEY'],
+        message:
+          'Smart-account identifiers are configured, but x402 stays on the stable keypair path until the delegated flow is fully demo-ready.',
+      },
+    })
+  })
+
+  it('enforces the smart-account fee floor in readiness output', async () => {
+    const secret = Keypair.random().secret()
+    const { getWalletInfo, getEffectiveSmartAccountFeeCeiling } = await loadWalletModule(
+      secret,
+      'CSMARTACCOUNT',
+      500_000,
+    )
+
+    expect(getEffectiveSmartAccountFeeCeiling()).toBe(2_000_000)
+    await expect(getWalletInfo()).resolves.toMatchObject({
+      smartAccount: {
+        demoReady: true,
+        feeFloorApplied: true,
+        configuredMaxTransactionFeeStroops: 500_000,
+        effectiveMaxTransactionFeeStroops: 2_000_000,
       },
     })
   })

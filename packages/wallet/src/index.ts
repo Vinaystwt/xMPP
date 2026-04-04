@@ -9,6 +9,8 @@ import type {
   XmppWalletInfo,
 } from '@xmpp/types'
 
+export const SMART_ACCOUNT_MIN_TRANSACTION_FEE_STROOPS = 2_000_000
+
 function stableReceiptPayload(receipt: Omit<XmppSignedReceipt, 'signature'>) {
   return JSON.stringify({
     receiptId: receipt.receiptId,
@@ -83,8 +85,36 @@ function smartAccountConfigured() {
   return Boolean(config.wallet.smartAccountContractId)
 }
 
-function smartAccountLiveReady() {
-  return Boolean(config.wallet.smartAccountContractId && config.wallet.agentSecretKey)
+export function getEffectiveSmartAccountFeeCeiling() {
+  if (!smartAccountConfigured()) {
+    return config.x402.maxTransactionFeeStroops
+  }
+
+  return Math.max(config.x402.maxTransactionFeeStroops, SMART_ACCOUNT_MIN_TRANSACTION_FEE_STROOPS)
+}
+
+function smartAccountFeeFloorApplied() {
+  return smartAccountConfigured() &&
+    config.x402.maxTransactionFeeStroops < SMART_ACCOUNT_MIN_TRANSACTION_FEE_STROOPS
+}
+
+function getSmartAccountPreflightFailures() {
+  if (!smartAccountConfigured()) {
+    return ['XMPP_SMART_ACCOUNT_CONTRACT_ID']
+  }
+
+  return [
+    !config.wallet.agentSecretKey ? 'XMPP_AGENT_SECRET_KEY' : null,
+    !config.x402.facilitatorPrivateKey ? 'FACILITATOR_STELLAR_PRIVATE_KEY' : null,
+  ].filter((value): value is string => value !== null)
+}
+
+function smartAccountPrimaryReady() {
+  return Boolean(
+    config.wallet.smartAccountContractId &&
+      config.wallet.agentSecretKey &&
+      config.x402.facilitatorPrivateKey,
+  )
 }
 
 export function getRouteExecutionPlan(route: RouteKind): {
@@ -93,14 +123,14 @@ export function getRouteExecutionPlan(route: RouteKind): {
   smartAccount: XmppSmartAccountExecution
 } {
   const configured = smartAccountConfigured()
-  const liveReady = smartAccountLiveReady()
+  const liveReady = smartAccountPrimaryReady()
 
   if (route === 'x402') {
     if (liveReady) {
       return {
         settlementStrategy: 'smart-account',
         executionNote:
-          'x402 prefers the configured smart account as the client payment address and uses the delegated agent signer for auth entry signing.',
+          'x402 prefers the configured smart account, with an automatic fallback to keypair settlement if delegated auth becomes unavailable.',
         smartAccount: {
           configured: true,
           preferred: true,
@@ -114,7 +144,7 @@ export function getRouteExecutionPlan(route: RouteKind): {
     return {
       settlementStrategy: 'keypair',
       executionNote: configured
-        ? 'Smart account is configured but x402 is falling back to the agent keypair until delegated signing is fully ready.'
+        ? 'Smart account is configured, but x402 is staying on the agent keypair until the smart-account demo preconditions are fully satisfied.'
         : 'x402 is executing with the agent keypair.',
       smartAccount: {
         configured,
@@ -123,7 +153,7 @@ export function getRouteExecutionPlan(route: RouteKind): {
         used: false,
         contractId: config.wallet.smartAccountContractId ?? null,
         fallbackReason: configured
-          ? 'Smart-account execution preconditions are incomplete, so x402 falls back to keypair signing.'
+          ? 'Smart-account x402 is guarded until the delegated signer, facilitator, and fee-cap preconditions are all ready.'
           : 'No smart account is configured.',
       },
     }
@@ -161,7 +191,33 @@ export async function getWalletInfo(): Promise<XmppWalletInfo> {
     ? Keypair.fromSecret(config.mpp.feeBumpSecretKey)
     : null
   const smartAccountReady = smartAccountConfigured()
-  const smartAccountActive = smartAccountLiveReady()
+  const smartAccountActive = smartAccountPrimaryReady()
+  const smartAccountPreflightFailures = getSmartAccountPreflightFailures()
+  const smartAccountEffectiveFeeCeiling = getEffectiveSmartAccountFeeCeiling()
+  const smartAccountFeeFloorWasApplied = smartAccountFeeFloorApplied()
+  const smartAccountMode: XmppWalletInfo['smartAccount']['mode'] = smartAccountActive
+    ? 'x402-only'
+    : smartAccountReady
+      ? 'x402-only'
+      : 'inactive'
+  const smartAccountRouteCoverage: XmppWalletInfo['smartAccount']['routeCoverage'] = smartAccountReady
+    ? 'x402-only'
+    : 'inactive'
+  const smartAccountJudgeNotes = smartAccountActive
+    ? [
+        'Smart-account execution is enabled for x402 only.',
+        'If delegated x402 settlement becomes unavailable, xMPP falls back to the stable keypair path instead of surfacing a smart-account-specific failure.',
+        'MPP charge and session flows still use keypair execution because the current MPP client requires Keypair signers.',
+        smartAccountFeeFloorWasApplied
+          ? `The facilitator is enforcing a safe x402 fee ceiling of at least ${SMART_ACCOUNT_MIN_TRANSACTION_FEE_STROOPS.toLocaleString()} stroops for smart-account execution.`
+          : `The facilitator fee ceiling is set to ${smartAccountEffectiveFeeCeiling.toLocaleString()} stroops for smart-account x402 execution.`,
+      ]
+    : smartAccountReady
+      ? [
+          'A smart-account contract id is configured, but x402 is still guarded behind the stable keypair path until all demo preconditions are satisfied.',
+          'MPP charge and session flows remain explicit keypair routes.',
+        ]
+      : ['Smart-account execution is not configured yet.']
   const missingSecrets = [
     !config.wallet.agentSecretKey ? 'XMPP_AGENT_SECRET_KEY' : null,
     !config.x402.facilitatorPrivateKey ? 'FACILITATOR_STELLAR_PRIVATE_KEY' : null,
@@ -177,10 +233,14 @@ export async function getWalletInfo(): Promise<XmppWalletInfo> {
     settlementStrategy: smartAccountActive
       ? 'smart-account-x402-preferred'
       : smartAccountReady
-        ? 'smart-account-ready'
+        ? 'smart-account-partial-fallback'
         : 'keypair-live',
     smartAccount: {
       ready: smartAccountReady,
+      mode: smartAccountMode,
+      routeCoverage: smartAccountRouteCoverage,
+      demoReady: smartAccountActive,
+      guardedFallback: smartAccountReady,
       contractId: config.wallet.smartAccountContractId ?? null,
       wasmHash: config.wallet.smartAccountWasmHash,
       webauthnVerifierAddress: config.wallet.webauthnVerifierAddress,
@@ -189,11 +249,24 @@ export async function getWalletInfo(): Promise<XmppWalletInfo> {
       thresholdPolicyAddress: config.wallet.thresholdPolicyAddress,
       preferredRoutes: smartAccountActive ? ['x402'] : [],
       fallbackRoutes: smartAccountReady ? ['mpp-charge', 'mpp-session-open', 'mpp-session-reuse'] : [],
+      supportedRoutes: ['x402'],
+      unsupportedRoutes: ['mpp-charge', 'mpp-session-open', 'mpp-session-reuse'],
+      unsupportedReason: smartAccountReady
+        ? 'MPP charge and MPP session routes still require explicit Keypair signers in the current client stack.'
+        : null,
+      configuredMaxTransactionFeeStroops: config.x402.maxTransactionFeeStroops,
+      effectiveMaxTransactionFeeStroops: smartAccountEffectiveFeeCeiling,
+      feeFloorApplied: smartAccountFeeFloorWasApplied,
+      preflightFailures: smartAccountPreflightFailures,
+      coverageMessage: smartAccountReady
+        ? 'Smart-account execution is intentionally limited to x402. All MPP routes remain keypair-backed.'
+        : 'Smart-account execution is not configured.',
       message: smartAccountActive
-        ? 'x402 can prefer the smart account path; MPP routes still fall back to keypair execution.'
+        ? 'Smart-account execution is enabled for x402 only, with guarded fallback to the stable keypair path if the delegated route becomes unavailable.'
         : smartAccountReady
-          ? 'Smart account identifiers are configured, but x402 still falls back to keypair execution until delegated signing is fully ready.'
+          ? 'Smart-account identifiers are configured, but x402 stays on the stable keypair path until the delegated flow is fully demo-ready.'
           : 'Smart account execution is not configured yet.',
+      judgeNotes: smartAccountJudgeNotes,
     },
     feeSponsorship: {
       enabled: config.mpp.feeSponsorship.chargeEnabled || config.mpp.feeSponsorship.sessionEnabled,

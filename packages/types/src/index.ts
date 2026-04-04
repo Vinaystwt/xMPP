@@ -315,6 +315,10 @@ export type XmppWalletInfo = {
     | 'keypair-live'
   smartAccount: {
     ready: boolean
+    mode: 'inactive' | 'x402-only' | 'full'
+    routeCoverage: 'inactive' | 'x402-only'
+    demoReady: boolean
+    guardedFallback: boolean
     contractId: string | null
     wasmHash: string
     webauthnVerifierAddress: string
@@ -323,7 +327,16 @@ export type XmppWalletInfo = {
     thresholdPolicyAddress: string
     preferredRoutes: RouteKind[]
     fallbackRoutes: RouteKind[]
+    supportedRoutes: RouteKind[]
+    unsupportedRoutes: RouteKind[]
+    unsupportedReason: string | null
+    configuredMaxTransactionFeeStroops: number
+    effectiveMaxTransactionFeeStroops: number
+    feeFloorApplied: boolean
+    preflightFailures: string[]
+    coverageMessage: string
     message: string
+    judgeNotes: string[]
   }
   feeSponsorship: {
     enabled: boolean
@@ -344,6 +357,20 @@ export type XmppHealthStatus = {
   network: string
   paymentExecutionMode: PaymentExecutionMode
   services: Record<string, string>
+  smartAccount: {
+    configured: boolean
+    routeCoverage: 'inactive' | 'x402-only'
+    x402Preferred: boolean
+    mppFallback: boolean
+    demoReady: boolean
+    guardedFallback: boolean
+    unsupportedRoutes: RouteKind[]
+    unsupportedReason: string | null
+    configuredMaxTransactionFeeStroops: number
+    effectiveMaxTransactionFeeStroops: number
+    feeFloorApplied: boolean
+    preflightFailures: string[]
+  }
 }
 
 export type XmppCatalogResponse = {

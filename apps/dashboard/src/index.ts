@@ -617,6 +617,10 @@ function renderDashboardHtml() {
         const spentRatio = Math.min(100, ((state.spentThisSessionUsd ?? 0) / Math.max(state.dailyBudgetUsd ?? 1, 0.001)) * 100);
         const feeSponsor = wallet.feeSponsorship ?? {};
         const contractPolicyCount = state.contractAgentPolicies?.length ?? 0;
+        const smartAccount = wallet.smartAccount ?? {};
+        const judgeNotes = (smartAccount.judgeNotes ?? []).map((note) => escapeHtml(note)).join('<br />');
+        const guardedFallback = smartAccount.guardedFallback ? 'yes' : 'no';
+        const preflightFailures = (smartAccount.preflightFailures ?? []).join(', ') || 'None';
         return [
           '<article class="budget-card">' +
             '<h3>Operator Budget</h3>' +
@@ -634,7 +638,21 @@ function renderDashboardHtml() {
             '<div class="budget-copy">Connected: <strong>' + (wallet.connected ? 'yes' : 'no') + '</strong></div>' +
             '<div class="budget-copy">Strategy: <strong>' + escapeHtml(wallet.settlementStrategy ?? 'keypair-live') + '</strong></div>' +
             '<div class="budget-copy">Agent: <span class="mono">' + escapeHtml(wallet.agentPublicKey ?? 'not configured') + '</span></div>' +
-            '<div class="budget-copy">Smart account: ' + escapeHtml(wallet.smartAccount?.message ?? 'Not configured') + '</div>' +
+            '<div class="budget-copy">Smart account mode: <strong>' + escapeHtml(smartAccount.mode ?? 'inactive') + '</strong></div>' +
+            '<div class="budget-copy">Smart account demo-ready: <strong>' + (smartAccount.demoReady ? 'yes' : 'no') + '</strong></div>' +
+            '<div class="budget-copy">Guarded fallback: <strong>' + guardedFallback + '</strong></div>' +
+            '<div class="budget-copy">Route coverage: <strong>' + escapeHtml(smartAccount.routeCoverage ?? 'inactive') + '</strong></div>' +
+            '<div class="budget-copy">Supported routes: <span class="mono">' + escapeHtml((smartAccount.supportedRoutes ?? []).join(', ') || 'none') + '</span></div>' +
+            '<div class="budget-copy">Unsupported routes: <span class="mono">' + escapeHtml((smartAccount.unsupportedRoutes ?? []).join(', ') || 'none') + '</span></div>' +
+            '<div class="budget-copy">Fallback routes: <span class="mono">' + escapeHtml((smartAccount.fallbackRoutes ?? []).join(', ') || 'none') + '</span></div>' +
+            '<div class="budget-copy">Coverage note: ' + escapeHtml(smartAccount.coverageMessage ?? 'Not configured') + '</div>' +
+            '<div class="budget-copy">Unsupported reason: ' + escapeHtml(smartAccount.unsupportedReason ?? 'None') + '</div>' +
+            '<div class="budget-copy">Configured fee ceiling: <strong>' + escapeHtml(String(smartAccount.configuredMaxTransactionFeeStroops ?? 0)) + '</strong></div>' +
+            '<div class="budget-copy">Effective fee ceiling: <strong>' + escapeHtml(String(smartAccount.effectiveMaxTransactionFeeStroops ?? 0)) + '</strong></div>' +
+            '<div class="budget-copy">Fee floor applied: <strong>' + (smartAccount.feeFloorApplied ? 'yes' : 'no') + '</strong></div>' +
+            '<div class="budget-copy">Smart account: ' + escapeHtml(smartAccount.message ?? 'Not configured') + '</div>' +
+            (judgeNotes ? '<div class="budget-copy" style="margin-top:10px;">' + judgeNotes + '</div>' : '') +
+            '<div class="budget-copy">Smart-account preflight gaps: <span class="mono">' + escapeHtml(preflightFailures) + '</span></div>' +
             '<div class="budget-copy">Missing secrets: <span class="mono">' + escapeHtml(missingSecrets) + '</span></div>' +
           '</article>',
           '<article class="budget-card">' +
