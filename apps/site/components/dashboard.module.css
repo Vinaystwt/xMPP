@@ -1,0 +1,418 @@
+.page {
+  min-height: 100vh;
+  padding: 24px 24px 40px;
+}
+
+.frame {
+  width: min(1280px, 100%);
+  margin: 0 auto;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: auto 1fr auto auto auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: rgba(8, 20, 31, 0.86);
+  backdrop-filter: blur(12px);
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--brand-accent);
+  font-size: 18px;
+  letter-spacing: 0.04em;
+}
+
+.brandMark {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--brand-accent), var(--route-deny));
+  box-shadow: 0 0 14px rgba(107, 231, 200, 0.2);
+}
+
+.title {
+  color: var(--text-primary);
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.badge,
+.wallet,
+.treasury {
+  color: var(--text-secondary);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.treasury strong {
+  color: var(--text-warm);
+  font-weight: 600;
+}
+
+.grid {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.panel {
+  min-height: 360px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background:
+    linear-gradient(180deg, rgba(15, 28, 41, 0.96), rgba(8, 20, 31, 0.98));
+}
+
+.panelHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.panelTitle {
+  margin: 0;
+  color: var(--text-warm);
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.panelMeta {
+  color: var(--text-secondary);
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.live {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.liveDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--brand-accent);
+  box-shadow: 0 0 12px rgba(107, 231, 200, 0.32);
+}
+
+.eventList {
+  margin-top: 18px;
+  display: grid;
+  gap: 10px;
+}
+
+.eventRow {
+  display: grid;
+  grid-template-columns: 78px minmax(120px, 1fr) minmax(100px, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--event-color) 8%, transparent), rgba(255, 255, 255, 0.02)),
+    rgba(255, 255, 255, 0.02);
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 13px;
+}
+
+.eventTime {
+  color: var(--text-secondary);
+}
+
+.eventRoute {
+  color: var(--event-color);
+}
+
+.eventService {
+  color: var(--text-primary);
+}
+
+.eventAmount {
+  color: var(--text-warm);
+  justify-self: end;
+}
+
+.sessionList,
+.budgetList,
+.serviceList,
+.receiptList {
+  margin-top: 18px;
+  display: grid;
+  gap: 12px;
+}
+
+.sessionRow,
+.receiptRow {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.sessionTop,
+.budgetRow,
+.serviceRow,
+.receiptTop,
+.policyRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sessionService,
+.receiptLabel,
+.policyLabel {
+  color: var(--text-primary);
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 14px;
+}
+
+.sessionStatus {
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.statusOpen {
+  color: var(--route-mpp-session-open);
+  border-color: color-mix(in srgb, var(--route-mpp-session-open) 44%, var(--border));
+}
+
+.statusClosed {
+  color: var(--text-secondary);
+}
+
+.sessionMeta,
+.receiptHash,
+.policyValue {
+  color: var(--text-secondary);
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 13px;
+}
+
+.lifecycleMini {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.miniTrack {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.miniProgress {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 72%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    var(--route-mpp-session-open),
+    var(--route-mpp-session-reuse) 60%,
+    var(--route-mpp-session-reuse)
+  );
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.16);
+}
+
+.miniNodes {
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.miniNode {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.miniDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  border: 2px solid var(--border);
+  background: rgba(8, 20, 31, 0.95);
+}
+
+.miniDotOpen {
+  background: var(--route-mpp-session-open);
+  border-color: var(--route-mpp-session-open);
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.24);
+}
+
+.miniDotReuse {
+  background: var(--route-mpp-session-reuse);
+  border-color: var(--route-mpp-session-reuse);
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.24);
+}
+
+.miniDotClose {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.miniLabel,
+.miniNote {
+  color: var(--text-secondary);
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 11px;
+  text-align: center;
+}
+
+.summaryGrid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.summaryCard {
+  padding: 14px 16px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.summaryLabel {
+  display: block;
+  color: var(--text-secondary);
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.summaryValue {
+  display: block;
+  margin-top: 8px;
+  color: var(--text-warm);
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 18px;
+}
+
+.budgetRow,
+.serviceRow,
+.receiptTop,
+.policyRow {
+  padding: 12px 14px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.budgetLabel,
+.serviceLabel,
+.receiptMeta {
+  color: var(--text-primary);
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 13px;
+}
+
+.budgetValue,
+.serviceValue {
+  color: var(--text-secondary);
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 12px;
+}
+
+.budgetBar {
+  margin-top: 8px;
+  height: 8px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.budgetFill {
+  height: 100%;
+  border-radius: calc(var(--radius-card) - 1px);
+  background: linear-gradient(90deg, var(--brand-accent), color-mix(in srgb, var(--brand-accent) 40%, white 8%));
+}
+
+.receiptButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+
+.explorerLink {
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.explorerLink:hover {
+  color: var(--text-primary);
+  text-decoration: underline;
+}
+
+@media (max-width: 1080px) {
+  .header {
+    grid-template-columns: 1fr;
+    top: 12px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .page {
+    padding: 16px 16px 32px;
+  }
+
+  .panel {
+    min-height: auto;
+  }
+
+  .eventRow {
+    grid-template-columns: 1fr;
+  }
+
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+}

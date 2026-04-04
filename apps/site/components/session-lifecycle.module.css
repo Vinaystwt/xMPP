@@ -1,0 +1,193 @@
+.shell {
+  min-height: auto;
+  padding: var(--section-padding-desktop) 24px 80px;
+}
+
+.panel {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  padding: 32px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(107, 231, 200, 0.08), transparent 24%),
+    linear-gradient(180deg, rgba(15, 28, 41, 0.98), rgba(8, 20, 31, 0.98));
+  cursor: pointer;
+  outline: none;
+}
+
+.panel:focus-visible {
+  box-shadow: 0 0 0 1px var(--brand-accent);
+}
+
+.header {
+  max-width: 760px;
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  color: var(--text-muted);
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(34px, 5vw, 60px);
+  line-height: 0.98;
+  letter-spacing: -0.05em;
+  color: var(--text-warm);
+}
+
+.subtitle {
+  margin: 18px 0 0;
+  color: var(--text-secondary);
+  font-size: 18px;
+  line-height: 1.65;
+}
+
+.canvas {
+  margin-top: 36px;
+  padding: 28px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(180deg, rgba(8, 20, 31, 0.9), rgba(15, 28, 41, 0.82));
+}
+
+.diagram {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.track {
+  stroke: color-mix(in srgb, var(--border) 65%, white 6%);
+  stroke-width: 6;
+  stroke-linecap: round;
+  pathLength: 1;
+}
+
+.progress {
+  stroke: color-mix(in srgb, var(--text-warm) 32%, var(--brand-accent) 68%);
+  stroke-width: 6;
+  stroke-linecap: round;
+  pathLength: 1;
+  filter: drop-shadow(0 0 12px rgba(107, 231, 200, 0.16));
+}
+
+.nodeCore {
+  stroke-width: 3;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.nodeGrid {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.nodeBlock {
+  display: grid;
+  gap: 10px;
+}
+
+.nodeLabelRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nodeDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  border: 2px solid var(--border);
+  background: rgba(8, 20, 31, 0.95);
+  transition: border-color 220ms ease, background 220ms ease, box-shadow 220ms ease;
+}
+
+.nodeDotActive {
+  background: var(--node-color);
+  border-color: var(--node-color);
+  box-shadow: 0 0 16px var(--node-glow), 0 0 28px var(--node-glow);
+}
+
+.nodeLabel {
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.nodeNote {
+  padding-left: 22px;
+  min-height: 21px;
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.comparison {
+  margin-top: 26px;
+  display: grid;
+  gap: 10px;
+}
+
+.compareBlock {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+}
+
+.compareLabel {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.compareValue {
+  color: var(--text-primary);
+  font-size: 18px;
+}
+
+.saved {
+  margin-left: 10px;
+  color: var(--route-mpp-session-reuse);
+  font-style: normal;
+}
+
+@media (max-width: 1080px) {
+  .nodeGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .shell {
+    padding: var(--section-padding-mobile) 16px 80px;
+  }
+
+  .panel {
+    padding: 22px;
+  }
+
+  .canvas {
+    padding: 18px;
+    overflow-x: auto;
+  }
+
+  .diagram {
+    width: 860px;
+    max-width: none;
+  }
+
+  .nodeGrid {
+    width: 860px;
+    max-width: none;
+  }
+}

@@ -1,0 +1,60 @@
+:root {
+  --font-geist:
+    "Geist", "Aptos", "SF Pro Display", "Segoe UI Variable Display", "Inter", system-ui, sans-serif;
+  --font-mono:
+    "JetBrains Mono", "SFMono-Regular", "SF Mono", "Cascadia Code", "IBM Plex Mono", monospace;
+  --bg-base: #08141f;
+  --bg-surface: #0f1c29;
+  --bg-elevated: #122434;
+  --border: #1d3344;
+  --brand-accent: #6be7c8;
+  --text-primary: #f7f3e8;
+  --text-secondary: #a8b7c4;
+  --text-muted: #a8b7c4;
+  --text-warm: #f7f3e8;
+  --route-x402: #6be7c8;
+  --route-mpp-charge: #8b5cf6;
+  --route-mpp-session-open: #10b981;
+  --route-mpp-session-reuse: #f59e0b;
+  --route-deny: #ff9153;
+  --glow-x402: rgba(107, 231, 200, 0.28);
+  --glow-mpp-charge: rgba(139, 92, 246, 0.28);
+  --glow-mpp-session-open: rgba(16, 185, 129, 0.28);
+  --glow-mpp-session-reuse: rgba(245, 158, 11, 0.3);
+  --radius-card: 8px;
+  --section-padding-desktop: 120px;
+  --section-padding-mobile: 80px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-geist), system-ui, sans-serif;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.18;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(107, 231, 200, 0.08), transparent 18%),
+    radial-gradient(circle at 82% 22%, rgba(255, 145, 83, 0.08), transparent 16%),
+    radial-gradient(circle at 50% 80%, rgba(245, 158, 11, 0.06), transparent 18%);
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+}

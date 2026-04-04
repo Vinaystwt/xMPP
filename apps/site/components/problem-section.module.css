@@ -1,0 +1,85 @@
+.shell {
+  padding: var(--section-padding-desktop) 24px;
+}
+
+.frame {
+  width: min(960px, 100%);
+  margin: 0 auto;
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  color: var(--text-muted);
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  max-width: 760px;
+  color: var(--text-warm);
+  font-size: clamp(34px, 5vw, 56px);
+  line-height: 0.98;
+  letter-spacing: -0.05em;
+}
+
+.copy {
+  max-width: 760px;
+  margin-top: 22px;
+  display: grid;
+  gap: 18px;
+  color: var(--text-primary);
+  font-size: 18px;
+  line-height: 1.78;
+}
+
+.copy p {
+  margin: 0;
+}
+
+.flow {
+  margin-top: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.flowPiece {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.flowNode {
+  color: var(--text-secondary);
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.flowGateway {
+  color: var(--brand-accent);
+  font-size: 15px;
+  font-weight: 600;
+  filter: drop-shadow(0 0 8px rgba(107, 231, 200, 0.3));
+}
+
+.flowArrow {
+  color: var(--text-secondary);
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 15px;
+}
+
+@media (max-width: 720px) {
+  .shell {
+    padding: var(--section-padding-mobile) 16px;
+  }
+
+  .copy {
+    font-size: 17px;
+  }
+}

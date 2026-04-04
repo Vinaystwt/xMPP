@@ -1,0 +1,376 @@
+.shell {
+  min-height: auto;
+  padding: var(--section-padding-desktop) 24px;
+}
+
+.shellDisplay {
+  min-height: auto;
+  padding: 0;
+}
+
+.frame {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  color: var(--text-muted);
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  max-width: 860px;
+  font-size: clamp(38px, 6vw, 72px);
+  line-height: 0.94;
+  letter-spacing: -0.05em;
+  color: var(--text-warm);
+}
+
+.subtitle {
+  margin: 18px 0 0;
+  max-width: 760px;
+  color: var(--text-secondary);
+  font-size: 18px;
+  line-height: 1.65;
+}
+
+.panel {
+  margin-top: 32px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(180deg, rgba(16, 28, 41, 0.96), rgba(10, 19, 28, 0.98));
+  overflow: hidden;
+}
+
+.panelDisplay {
+  margin-top: 0;
+  border-radius: var(--radius-card);
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tabsDisplay {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.tab {
+  appearance: none;
+  border: 0;
+  background: rgba(10, 19, 28, 0.96);
+  color: var(--text-secondary);
+  padding: 18px 16px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.tabDisplay {
+  cursor: default;
+  padding: 14px 10px;
+}
+
+.tab:hover {
+  background: rgba(18, 36, 52, 0.98);
+  color: var(--text-primary);
+}
+
+.tabDisplay:hover {
+  background: rgba(10, 19, 28, 0.96);
+  color: inherit;
+}
+
+.tabDisplay:disabled {
+  opacity: 1;
+}
+
+.tabActive {
+  background: rgba(20, 38, 53, 0.98);
+  color: var(--text-warm);
+}
+
+.tabLabel {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
+
+.tabTitle {
+  display: block;
+  margin-top: 8px;
+  font-size: 15px;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+}
+
+.tabsDisplay .tabTitle {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.body {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(0, 1.1fr);
+}
+
+.bodyDisplay {
+  grid-template-columns: 1fr;
+}
+
+.scenario {
+  padding: 30px;
+  border-right: 1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(107, 231, 200, 0.08), transparent 30%),
+    rgba(9, 17, 26, 0.9);
+}
+
+.scenarioTitle {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.scenarioDescription {
+  margin: 14px 0 24px;
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.metaGrid {
+  display: grid;
+  gap: 12px;
+}
+
+.metaCard {
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 14px 16px;
+}
+
+.metaLabel {
+  display: block;
+  color: var(--text-muted);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.metaValue {
+  display: block;
+  margin-top: 8px;
+  font-size: 18px;
+  letter-spacing: -0.03em;
+}
+
+.scores {
+  padding: 30px;
+}
+
+.scoresDisplay {
+  padding: 20px;
+}
+
+.scoreHeader {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.2fr) 120px 150px;
+  gap: 16px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.scoreHeaderDisplay {
+  grid-template-columns: minmax(120px, 1fr) 90px 120px;
+}
+
+.scoreList {
+  position: relative;
+  margin-top: 18px;
+  display: grid;
+  gap: 14px;
+}
+
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(180px, 1.2fr) 120px 150px;
+  gap: 16px;
+  align-items: center;
+  padding: 18px 18px 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+}
+
+.bodyDisplay .row {
+  grid-template-columns: minmax(120px, 1fr) 90px 120px;
+  padding: 14px 14px 14px 18px;
+  border-radius: var(--radius-card);
+}
+
+.row::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--row-color);
+}
+
+.rowSelected {
+  border-color: color-mix(in srgb, var(--row-color) 60%, white 8%);
+  background:
+    linear-gradient(90deg, var(--row-glow), rgba(255, 255, 255, 0.03) 34%),
+    rgba(255, 255, 255, 0.04);
+}
+
+.rowDominant {
+  border-width: 2px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--row-color) 28%, transparent), rgba(255, 255, 255, 0.04) 42%),
+    rgba(255, 255, 255, 0.05);
+}
+
+.routeCell {
+  display: grid;
+  gap: 6px;
+}
+
+.routeTop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.routeDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--row-color);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--row-color) 22%, transparent);
+}
+
+.routeName {
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 19px;
+  letter-spacing: -0.03em;
+}
+
+.bodyDisplay .routeName {
+  font-size: 16px;
+}
+
+.routeCopy {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.cost {
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 18px;
+  color: var(--text-warm);
+}
+
+.scoreCell {
+  position: relative;
+  display: grid;
+  gap: 10px;
+}
+
+.scoreMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+}
+
+.selectedTag {
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--row-color) 55%, white 10%);
+  color: var(--row-color);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.scoreTrack {
+  position: relative;
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.scoreFill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--row-color) 55%, white 0%), var(--row-color));
+  box-shadow: 0 0 24px var(--row-glow);
+}
+
+@media (max-width: 980px) {
+  .body {
+    grid-template-columns: 1fr;
+  }
+
+  .scoreHeader,
+  .bodyDisplay .row,
+  .row {
+    grid-template-columns: minmax(140px, 1fr) 90px 120px;
+  }
+
+  .scenario {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tabs {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .shell {
+    padding: var(--section-padding-mobile) 16px;
+  }
+
+  .tabs,
+  .scoreHeader,
+  .row {
+    grid-template-columns: 1fr;
+  }
+
+  .scoreHeader {
+    display: none;
+  }
+
+  .scores,
+  .scenario {
+    padding: 22px;
+  }
+
+  .cost {
+    margin-top: 4px;
+  }
+}

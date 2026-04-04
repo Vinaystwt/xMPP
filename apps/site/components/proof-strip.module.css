@@ -1,0 +1,187 @@
+.shell {
+  padding: var(--section-padding-desktop) 24px 40px;
+}
+
+.frame {
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 28px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(180deg, rgba(15, 28, 41, 0.96), rgba(8, 20, 31, 0.98));
+}
+
+.header {
+  max-width: 760px;
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  color: var(--text-muted);
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  color: var(--text-warm);
+  font-size: clamp(30px, 4vw, 52px);
+  line-height: 0.98;
+  letter-spacing: -0.05em;
+}
+
+.subtitle {
+  margin: 16px 0 0;
+  color: var(--text-secondary);
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+.grid {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.card {
+  position: relative;
+  padding: 20px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--proof-color) 8%, transparent), rgba(255, 255, 255, 0.02)),
+    rgba(255, 255, 255, 0.02);
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  border-radius: var(--radius-card) 0 0 var(--radius-card);
+  background: var(--proof-color);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--proof-color);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--proof-color) 40%, transparent);
+}
+
+.route {
+  color: var(--proof-color);
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cardTitle {
+  margin: 18px 0 0;
+  color: var(--text-primary);
+  font-size: 24px;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+}
+
+.hashBlock {
+  margin-top: 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.hashLabel,
+.footerLabel {
+  color: var(--text-secondary);
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.hashValue {
+  color: var(--text-warm);
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 18px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 15px;
+}
+
+.link:hover {
+  color: var(--text-primary);
+  text-decoration: underline;
+}
+
+.footerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid color-mix(in srgb, var(--proof-color) 20%, var(--border));
+}
+
+.footerValue {
+  color: var(--text-primary);
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.command {
+  margin: 22px 0 0;
+  color: var(--text-secondary);
+  font-family: var(--font-mono), "SFMono-Regular", monospace;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+@media (max-width: 1040px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .shell {
+    padding: var(--section-padding-mobile) 16px 40px;
+  }
+
+  .frame {
+    padding: 22px;
+  }
+}
