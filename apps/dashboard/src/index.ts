@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { config } from '@xmpp/config'
 
 const app = express()
-const gatewayBaseUrl = `http://localhost:${config.gatewayPort}`
+const gatewayBaseUrl = config.dashboardGatewayUrl?.trim() || `http://localhost:${config.gatewayPort}`
 const moduleDir = dirname(fileURLToPath(import.meta.url))
 const repoRoot = resolve(moduleDir, '../../../')
 
@@ -557,7 +557,9 @@ function renderDashboardHtml() {
     </main>
 
     <script type="module">
-      const gatewayBaseUrl = ${JSON.stringify(gatewayBaseUrl)};
+      const defaultGatewayBaseUrl = ${JSON.stringify(gatewayBaseUrl)};
+      const queryGatewayBaseUrl = new URL(window.location.href).searchParams.get('gateway');
+      const gatewayBaseUrl = (queryGatewayBaseUrl && queryGatewayBaseUrl.trim()) || defaultGatewayBaseUrl;
       const currency = new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
@@ -618,7 +620,7 @@ function renderDashboardHtml() {
         const feeSponsor = wallet.feeSponsorship ?? {};
         const contractPolicyCount = state.contractAgentPolicies?.length ?? 0;
         const smartAccount = wallet.smartAccount ?? {};
-        const judgeNotes = (smartAccount.judgeNotes ?? []).map((note) => escapeHtml(note)).join('<br />');
+        const operatorNotes = (smartAccount.operatorNotes ?? []).map((note) => escapeHtml(note)).join('<br />');
         const guardedFallback = smartAccount.guardedFallback ? 'yes' : 'no';
         const preflightFailures = (smartAccount.preflightFailures ?? []).join(', ') || 'None';
         return [
@@ -651,7 +653,7 @@ function renderDashboardHtml() {
             '<div class="budget-copy">Effective fee ceiling: <strong>' + escapeHtml(String(smartAccount.effectiveMaxTransactionFeeStroops ?? 0)) + '</strong></div>' +
             '<div class="budget-copy">Fee floor applied: <strong>' + (smartAccount.feeFloorApplied ? 'yes' : 'no') + '</strong></div>' +
             '<div class="budget-copy">Smart account: ' + escapeHtml(smartAccount.message ?? 'Not configured') + '</div>' +
-            (judgeNotes ? '<div class="budget-copy" style="margin-top:10px;">' + judgeNotes + '</div>' : '') +
+            (operatorNotes ? '<div class="budget-copy" style="margin-top:10px;">' + operatorNotes + '</div>' : '') +
             '<div class="budget-copy">Smart-account preflight gaps: <span class="mono">' + escapeHtml(preflightFailures) + '</span></div>' +
             '<div class="budget-copy">Missing secrets: <span class="mono">' + escapeHtml(missingSecrets) + '</span></div>' +
           '</article>',

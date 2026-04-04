@@ -21,9 +21,14 @@ The core idea is simple:
 - `mpp-charge` for premium one-shot calls
 - `mpp-session-open` and `mpp-session-reuse` for repeated or streaming usage
 
-xMPP is not just MCP monetization. It is a routing and control layer that helps autonomous agents choose the right settlement primitive while keeping operators in control.
+xMPP sits between an agent and paid tools as a routing and control layer. It helps autonomous systems choose the right settlement primitive while keeping budgets, policies, and receipts visible to operators.
 
-## Submission Proof
+Important naming note:
+
+- `xMPP` means `x402 + MPP` routing on Stellar, not the older XMPP messaging protocol
+- `MPP charge` and `MPP session` in this repo refer to Stellar-native payment flows aligned with modern machine-payment patterns, settled on Stellar
+
+## Live Proof
 
 Real Stellar testnet proof from the current demo stack:
 
@@ -31,10 +36,10 @@ Real Stellar testnet proof from the current demo stack:
   - https://stellar.expert/explorer/testnet/tx/2cc2f8b5388e341e66a5ee68ebd000bf4804d314b82136d091e9b33dbdb37b5b
 - mpp-charge settlement:
   - https://stellar.expert/explorer/testnet/tx/3125c05d57563e027717cc52eff478c6612cb55fcd57a2eaee21cd5f3241b34e
-- x402 judge-preflight settlement:
+- additional x402 preflight settlement:
   - https://stellar.expert/explorer/testnet/tx/16c3093215a363b79ed8a5678d9549236b8b7a74f2b818caa3c46d4c5155f1e5
 
-Proof visuals for the submission page:
+Product proof visuals:
 
 ![xMPP dashboard proof](./assets/dashboard-proof.svg)
 
@@ -61,9 +66,33 @@ For the current 2-call verified session path:
 
 ![xMPP MPP lifecycle](./assets/mpp-lifecycle.svg)
 
+## Route Economics
+
+xMPP compares request shape, service hints, reusable session state, and policy constraints before it settles a paid call.
+
+- research-api, 1 exact request:
+  - `x402 = $0.01`
+  - chosen route: `x402`
+- market-api, 1 premium quote:
+  - naive `x402 = $0.04`
+  - `mpp-charge = $0.03`
+  - chosen route: `mpp-charge`
+- stream-api, 5 projected streaming calls:
+  - naive `x402 = $0.05`
+  - `mpp-session-open = $0.03`
+  - chosen route: `mpp-session-open`
+- stream-api, 5 more calls on a reusable session:
+  - naive `x402 = $0.05`
+  - `mpp-session-reuse = $0.025`
+  - chosen route: `mpp-session-reuse`
+
+![xMPP route economics](./assets/route-economics.svg)
+
+See [route-economics.md](./docs/route-economics.md) and [router-algorithm.md](./docs/router-algorithm.md) for the scoring model behind these decisions.
+
 ## Protocol Diagram
 
-This is the submission-grade overview of the protocol flow:
+Overview of the protocol flow:
 
 ![xMPP protocol diagram](./assets/protocol-diagram.svg)
 
@@ -74,7 +103,7 @@ This is the submission-grade overview of the protocol flow:
 - demo services for x402, MPP charge, and MPP session flows
 - operator dashboard with live route counts, budget state, session telemetry, and event feed
 - shared treasury agents with separate research and market worker ceilings on one wallet
-- installable `@xmpp/core` SDK and `@xmpp/mcp` server package surfaces
+- release-packed `@xmpp/core` SDK and `@xmpp/mcp` server package surfaces
 - Soroban contracts for global policy, service policy, pause control, and session registry
 - runtime contract wiring with local fallback when contract ids are absent
 - live smoke script covering x402, MPP charge, MPP session open, MPP session reuse, and deny-by-policy
@@ -86,7 +115,7 @@ This is the submission-grade overview of the protocol flow:
 - `apps/demo-services`
   - paid local services used in the demo, including `/.well-known/xmpp.json` capability documents
 - `apps/mcp-server`
-  - publishable `@xmpp/mcp` stdio MCP server for Claude, Codex, and other MCP clients
+  - stdio MCP server package surface for MCP-compatible clients
 - `apps/dashboard`
   - operator console for the demo
 - `packages/router`
@@ -147,6 +176,9 @@ Optional but important for the full demo:
 - `MPP_CHANNEL_CONTRACT_ID`
 - `XMPP_POLICY_CONTRACT_ID`
 - `XMPP_SESSION_REGISTRY_CONTRACT_ID`
+- `XMPP_DASHBOARD_GATEWAY_URL`
+
+`XMPP_DASHBOARD_GATEWAY_URL` is optional for local runs. Set it when the dashboard needs to point at a non-local gateway deployment.
 
 Generate free Stellar testnet identities:
 
@@ -236,9 +268,20 @@ curl -s http://localhost:4300/fetch \
 - `xmpp_estimate_workflow`
 - `xmpp_receipt_verify`
 
+## Agent Flow
+
+xMPP already exposes the surfaces needed for an agent to preview, pay, explain, and verify the same workflow.
+
+- MCP path:
+  - `xmpp_policy_preview` -> `xmpp_fetch` -> `xmpp_explain` -> `xmpp_session_list` -> `xmpp_receipt_verify`
+- gateway-backed path:
+  - [langchain-agent.py](./examples/langchain-agent.py)
+
+See [agent-flow.md](./docs/agent-flow.md) for the canonical sequence.
+
 ## Installable Packages
 
-Build the publishable surfaces locally:
+Build the package surfaces locally:
 
 ```bash
 pnpm --filter @xmpp/core build
@@ -294,15 +337,24 @@ Deploy to Stellar testnet:
 
 The deploy script writes ids to `contracts/scripts/addresses.json`.
 
+## Smart Account Coverage
+
+- `x402` is the only route currently exercised through the guarded smart-account path
+- `mpp-charge` and `mpp-session` remain keypair-backed in the current verified demo configuration
+- the guarded fallback is intentional: it preserves live settlement reliability while the smart-account path is narrowed to the route that is already verified end to end
+
+That means xMPP already shows smart-account-aware settlement, but it does not yet claim smart-account-first execution for every route.
+
 ## Docs
 
 - [architecture.md](./docs/architecture.md)
 - [api-catalog.md](./docs/api-catalog.md)
 - [router-algorithm.md](./docs/router-algorithm.md)
+- [route-economics.md](./docs/route-economics.md)
+- [agent-flow.md](./docs/agent-flow.md)
 - [demo-script.md](./docs/demo-script.md)
 - [threat-model.md](./docs/threat-model.md)
 - [PROTOCOL.md](./docs/PROTOCOL.md)
-- [llm-deep-review-prompt.md](./docs/llm-deep-review-prompt.md)
 - [sdk.md](./docs/sdk.md)
 - [python-client.py](./examples/python-client.py)
 - [node-sdk.ts](./examples/node-sdk.ts)

@@ -67,7 +67,7 @@
   <text x="340" y="804" fill="#93C5FD" font-size="20" font-family="Arial, sans-serif">$0.00 spent / $0.50 daily</text>
 
   <rect x="700" y="600" width="622" height="226" rx="18" fill="#13243A" stroke="#203652"/>
-  <text x="726" y="642" fill="#F7FAFC" font-size="24" font-family="Arial, sans-serif" font-weight="700">Judge Notes</text>
+  <text x="726" y="642" fill="#F7FAFC" font-size="24" font-family="Arial, sans-serif" font-weight="700">Operator Notes</text>
   <text x="726" y="682" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">• Smart-account execution is enabled for x402 only.</text>
   <text x="726" y="718" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">• MPP charge and session flows stay on explicit keypair execution.</text>
   <text x="726" y="754" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">• If delegated x402 fails, xMPP falls back instead of surfacing an error.</text>

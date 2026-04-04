@@ -72,8 +72,8 @@ async function main() {
         {
           ok: success,
           summary: success
-            ? 'Judge-facing smart-account x402 path is ready.'
-            : 'Judge-facing smart-account x402 path is not fully ready.',
+            ? 'Smart-account x402 path is ready.'
+            : 'Smart-account x402 path is not fully ready.',
           wallet: {
             settlementStrategy: wallet.settlementStrategy,
             smartAccount: wallet.smartAccount,
@@ -102,6 +102,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error('[xMPP judge preflight] failed', error)
+  console.error('[xMPP preflight] failed', error)
   process.exit(1)
 })

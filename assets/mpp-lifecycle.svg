@@ -1,7 +1,7 @@
 <svg width="1400" height="800" viewBox="0 0 1400 800" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect width="1400" height="800" fill="#08111F"/>
   <text x="64" y="88" fill="#F7FAFC" font-size="38" font-family="Arial, sans-serif" font-weight="700">MPP Session Lifecycle</text>
-  <text x="64" y="124" fill="#9FB2C8" font-size="18" font-family="Arial, sans-serif">What judges should see: open once, reuse cheaply, keep proof, and save against naive x402</text>
+  <text x="64" y="124" fill="#9FB2C8" font-size="18" font-family="Arial, sans-serif">Open once, reuse cheaply, keep proof, and save against naive x402</text>
 
   <rect x="64" y="180" width="280" height="420" rx="24" fill="#13243A" stroke="#203652"/>
   <text x="96" y="232" fill="#93C5FD" font-size="26" font-family="Arial, sans-serif" font-weight="700">1. Session Open</text>

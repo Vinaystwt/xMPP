@@ -336,7 +336,7 @@ export type XmppWalletInfo = {
     preflightFailures: string[]
     coverageMessage: string
     message: string
-    judgeNotes: string[]
+    operatorNotes: string[]
   }
   feeSponsorship: {
     enabled: boolean

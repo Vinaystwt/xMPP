@@ -203,7 +203,7 @@ export async function getWalletInfo(): Promise<XmppWalletInfo> {
   const smartAccountRouteCoverage: XmppWalletInfo['smartAccount']['routeCoverage'] = smartAccountReady
     ? 'x402-only'
     : 'inactive'
-  const smartAccountJudgeNotes = smartAccountActive
+  const smartAccountOperatorNotes = smartAccountActive
     ? [
         'Smart-account execution is enabled for x402 only.',
         'If delegated x402 settlement becomes unavailable, xMPP falls back to the stable keypair path instead of surfacing a smart-account-specific failure.',
@@ -266,7 +266,7 @@ export async function getWalletInfo(): Promise<XmppWalletInfo> {
         : smartAccountReady
           ? 'Smart-account identifiers are configured, but x402 stays on the stable keypair path until the delegated flow is fully demo-ready.'
           : 'Smart account execution is not configured yet.',
-      judgeNotes: smartAccountJudgeNotes,
+      operatorNotes: smartAccountOperatorNotes,
     },
     feeSponsorship: {
       enabled: config.mpp.feeSponsorship.chargeEnabled || config.mpp.feeSponsorship.sessionEnabled,

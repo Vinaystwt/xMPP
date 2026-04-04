@@ -36,7 +36,7 @@
     "xmpp:bootstrap": "pnpm exec tsx scripts/bootstrap-testnet.ts",
     "xmpp:smart-account:bootstrap": "pnpm exec tsx scripts/bootstrap-smart-account.ts",
     "xmpp:smart-account:check": "pnpm exec tsx scripts/bootstrap-smart-account.ts --check",
-    "xmpp:judge:preflight": "pnpm exec tsx scripts/judge-preflight.ts",
+    "xmpp:preflight": "pnpm exec tsx scripts/preflight.ts",
     "xmpp:demo": "pnpm exec tsx scripts/demo-stack.ts",
     "xmpp:demo:smoke": "pnpm exec tsx scripts/demo-stack.ts --smoke",
     "xmpp:test": "pnpm check",

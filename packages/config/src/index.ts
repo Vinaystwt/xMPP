@@ -18,6 +18,7 @@ const envSchema = z.object({
   XMPP_NETWORK_PASSPHRASE: z.string().default('Test SDF Network ; September 2015'),
   XMPP_GATEWAY_PORT: z.coerce.number().default(4300),
   XMPP_DASHBOARD_PORT: z.coerce.number().default(4310),
+  XMPP_DASHBOARD_GATEWAY_URL: z.string().optional(),
   XMPP_DAILY_BUDGET_USD: z.coerce.number().default(0.5),
   XMPP_AGENT_SECRET_KEY: z.string().optional(),
   XMPP_SMART_ACCOUNT_CONTRACT_ID: z.string().optional(),
@@ -80,6 +81,7 @@ export const config = {
   networkPassphrase: env.XMPP_NETWORK_PASSPHRASE,
   gatewayPort: env.XMPP_GATEWAY_PORT,
   dashboardPort: env.XMPP_DASHBOARD_PORT,
+  dashboardGatewayUrl: env.XMPP_DASHBOARD_GATEWAY_URL,
   dailyBudgetUsd: env.XMPP_DAILY_BUDGET_USD,
   facilitatorUrl: env.X402_FACILITATOR_URL,
   wallet: {
