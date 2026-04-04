@@ -20,8 +20,8 @@
 
   <rect x="64" y="436" width="516" height="244" rx="18" fill="#13243A" stroke="#203652"/>
   <text x="90" y="478" fill="#F7FAFC" font-size="24" font-family="Arial, sans-serif" font-weight="700">Agent Treasury States</text>
-  <text x="90" y="524" fill="#F7FAFC" font-size="18" font-family="Courier New, monospace">research-agent   spent 0.01   lastRoute x402</text>
-  <text x="90" y="562" fill="#F7FAFC" font-size="18" font-family="Courier New, monospace">market-agent     spent 0.05   lastRoute mpp-session-reuse</text>
+  <text x="90" y="524" fill="#F7FAFC" font-size="16" font-family="Courier New, monospace">research-agent   spent 0.01   lastRoute x402</text>
+  <text x="90" y="562" fill="#F7FAFC" font-size="16" font-family="Courier New, monospace">market-agent     spent 0.05   lastRoute mpp-session-reuse</text>
 
   <rect x="620" y="436" width="516" height="244" rx="18" fill="#13243A" stroke="#203652"/>
   <text x="646" y="478" fill="#F7FAFC" font-size="24" font-family="Arial, sans-serif" font-weight="700">Contract Agent Policies</text>
