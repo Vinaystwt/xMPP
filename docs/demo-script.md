@@ -28,6 +28,7 @@ pnpm check
 cd contracts && cargo test
 pnpm xmpp:smoke
 pnpm xmpp:demo:smoke
+pnpm xmpp:preflight
 ```
 
 ## Demo Flow

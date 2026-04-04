@@ -215,6 +215,7 @@ Live smoke path:
 ```bash
 pnpm xmpp:smoke
 pnpm xmpp:demo:smoke
+pnpm xmpp:preflight
 ```
 
 The smoke script exercises:
@@ -354,6 +355,7 @@ That means xMPP already shows smart-account-aware settlement, but it does not ye
 - [agent-flow.md](./docs/agent-flow.md)
 - [deployment.md](./docs/deployment.md)
 - [demo-script.md](./docs/demo-script.md)
+- [release-checklist.md](./docs/release-checklist.md)
 - [threat-model.md](./docs/threat-model.md)
 - [PROTOCOL.md](./docs/PROTOCOL.md)
 - [sdk.md](./docs/sdk.md)
