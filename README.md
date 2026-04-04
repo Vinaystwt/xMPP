@@ -4,16 +4,68 @@
   <img src="./assets/xmpp-mark.svg" alt="xMPP logo" width="72" height="72" />
 </p>
 
-The ultimate x402 ↔ MPP brain for autonomous agents on Stellar.
+xMPP is the payment-routing brain and policy/control plane for autonomous agents on Stellar.
 
 xMPP gives an agent one payment-aware fetch path that can:
 
 - call a paid tool normally
 - intercept `402 Payment Required`
-- evaluate policy and route economics
+- evaluate route economics, treasury policy, and budget limits
 - settle through `x402`, `MPP charge`, or `MPP session`
 - retry automatically
-- return operator-facing route, budget, and session metadata
+- expose operator-facing route, budget, receipt, and session metadata
+
+The core idea is simple:
+
+- `x402` for exact one-off requests
+- `mpp-charge` for premium one-shot calls
+- `mpp-session-open` and `mpp-session-reuse` for repeated or streaming usage
+
+xMPP is not just MCP monetization. It is a routing and control layer that helps autonomous agents choose the right settlement primitive while keeping operators in control.
+
+## Submission Proof
+
+Real Stellar testnet proof from the current demo stack:
+
+- x402 smart-account settlement:
+  - https://stellar.expert/explorer/testnet/tx/2cc2f8b5388e341e66a5ee68ebd000bf4804d314b82136d091e9b33dbdb37b5b
+- mpp-charge settlement:
+  - https://stellar.expert/explorer/testnet/tx/3125c05d57563e027717cc52eff478c6612cb55fcd57a2eaee21cd5f3241b34e
+- x402 judge-preflight settlement:
+  - https://stellar.expert/explorer/testnet/tx/16c3093215a363b79ed8a5678d9549236b8b7a74f2b818caa3c46d4c5155f1e5
+
+Proof visuals for the submission page:
+
+![xMPP dashboard proof](./assets/dashboard-proof.svg)
+
+![xMPP signed receipt verification](./assets/receipt-proof.svg)
+
+![xMPP operator state proof](./assets/operator-state-proof.svg)
+
+## MPP Session Economics
+
+xMPP makes MPP session behavior visible instead of hiding it behind “it’s cheaper somehow.”
+
+The latest verified smoke run showed:
+
+- first stream call used `mpp-session-open`
+- second stream call used `mpp-session-reuse`
+- session state was visible in `/operator/state`
+- session savings were visible as `$0.015`
+
+For the current 2-call verified session path:
+
+- naive x402 cost: `$0.020`
+- actual MPP session cost: `$0.015`
+- savings: `$0.005`
+
+![xMPP MPP lifecycle](./assets/mpp-lifecycle.svg)
+
+## Protocol Diagram
+
+This is the submission-grade overview of the protocol flow:
+
+![xMPP protocol diagram](./assets/protocol-diagram.svg)
 
 ## What Exists Now
 
@@ -250,6 +302,7 @@ The deploy script writes ids to `contracts/scripts/addresses.json`.
 - [demo-script.md](./docs/demo-script.md)
 - [threat-model.md](./docs/threat-model.md)
 - [PROTOCOL.md](./docs/PROTOCOL.md)
+- [llm-deep-review-prompt.md](./docs/llm-deep-review-prompt.md)
 - [sdk.md](./docs/sdk.md)
 - [python-client.py](./examples/python-client.py)
 - [node-sdk.ts](./examples/node-sdk.ts)

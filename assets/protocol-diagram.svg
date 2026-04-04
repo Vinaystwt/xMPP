@@ -1,0 +1,49 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="900" fill="#08111F"/>
+  <text x="72" y="92" fill="#F7FAFC" font-size="42" font-family="Arial, sans-serif" font-weight="700">xMPP Protocol Diagram</text>
+  <text x="72" y="130" fill="#9FB2C8" font-size="20" font-family="Arial, sans-serif">Payment-routing brain + policy/control plane for autonomous agent HTTP calls on Stellar</text>
+
+  <rect x="72" y="214" width="250" height="140" rx="24" fill="#13243A" stroke="#203652"/>
+  <text x="102" y="270" fill="#F7FAFC" font-size="28" font-family="Arial, sans-serif" font-weight="700">Agent / MCP Client</text>
+  <text x="102" y="312" fill="#9FB2C8" font-size="18" font-family="Arial, sans-serif">Normal HTTP request</text>
+
+  <rect x="394" y="214" width="320" height="220" rx="24" fill="#13243A" stroke="#203652"/>
+  <text x="424" y="270" fill="#F7FAFC" font-size="28" font-family="Arial, sans-serif" font-weight="700">xMPP Gateway / Interceptor</text>
+  <text x="424" y="316" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">1. intercept `402 Payment Required`</text>
+  <text x="424" y="352" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">2. score routes and estimate workflow</text>
+  <text x="424" y="388" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">3. enforce policy and budget</text>
+
+  <rect x="786" y="160" width="742" height="330" rx="24" fill="#13243A" stroke="#203652"/>
+  <text x="816" y="218" fill="#F7FAFC" font-size="28" font-family="Arial, sans-serif" font-weight="700">Settlement Primitives</text>
+  <rect x="820" y="254" width="204" height="198" rx="18" fill="#0C1624" stroke="#2A466A"/>
+  <text x="846" y="302" fill="#FDE68A" font-size="24" font-family="Arial, sans-serif" font-weight="700">x402</text>
+  <text x="846" y="344" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">one-off exact calls</text>
+  <text x="846" y="380" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">smart-account capable</text>
+  <rect x="1056" y="254" width="204" height="198" rx="18" fill="#0C1624" stroke="#2A466A"/>
+  <text x="1082" y="302" fill="#FDE68A" font-size="24" font-family="Arial, sans-serif" font-weight="700">MPP Charge</text>
+  <text x="1082" y="344" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">premium one-shot</text>
+  <text x="1082" y="380" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">agent-funded</text>
+  <rect x="1292" y="254" width="204" height="198" rx="18" fill="#0C1624" stroke="#2A466A"/>
+  <text x="1318" y="302" fill="#FDE68A" font-size="24" font-family="Arial, sans-serif" font-weight="700">MPP Session</text>
+  <text x="1318" y="344" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">open + reuse</text>
+  <text x="1318" y="380" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">service-sponsored</text>
+
+  <rect x="394" y="530" width="320" height="250" rx="24" fill="#13243A" stroke="#203652"/>
+  <text x="424" y="586" fill="#F7FAFC" font-size="28" font-family="Arial, sans-serif" font-weight="700">Policy / Control Plane</text>
+  <text x="424" y="632" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">• global policy</text>
+  <text x="424" y="668" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">• service policy</text>
+  <text x="424" y="704" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">• agent budget slices</text>
+  <text x="424" y="740" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">• treasury + pause flag</text>
+
+  <rect x="786" y="530" width="742" height="250" rx="24" fill="#13243A" stroke="#203652"/>
+  <text x="816" y="586" fill="#F7FAFC" font-size="28" font-family="Arial, sans-serif" font-weight="700">Evidence / Operator Surface</text>
+  <text x="816" y="632" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">• tx hashes and Stellar Expert links</text>
+  <text x="816" y="668" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">• signed receipts and verification</text>
+  <text x="816" y="704" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">• operator state, sessions, route counts</text>
+  <text x="816" y="740" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">• MCP explain + workflow estimate + session list</text>
+
+  <path d="M322 284H394" stroke="#39577C" stroke-width="8" stroke-linecap="round"/>
+  <path d="M714 324H786" stroke="#39577C" stroke-width="8" stroke-linecap="round"/>
+  <path d="M554 434V530" stroke="#39577C" stroke-width="8" stroke-linecap="round"/>
+  <path d="M714 654H786" stroke="#39577C" stroke-width="8" stroke-linecap="round"/>
+</svg>

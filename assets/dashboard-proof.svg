@@ -1,0 +1,75 @@
+<svg width="1400" height="900" viewBox="0 0 1400 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1400" height="900" fill="#08111F"/>
+  <rect x="24" y="24" width="1352" height="852" rx="28" fill="#0E1A2B" stroke="#1E314D"/>
+  <text x="56" y="84" fill="#F7FAFC" font-size="36" font-family="Arial, sans-serif" font-weight="700">xMPP Dashboard Snapshot</text>
+  <text x="56" y="118" fill="#9FB2C8" font-size="18" font-family="Arial, sans-serif">Proof view: route diversity, treasury state, smart-account mode, and operator evidence</text>
+
+  <rect x="56" y="150" width="300" height="126" rx="18" fill="#13243A" stroke="#203652"/>
+  <text x="82" y="190" fill="#9FB2C8" font-size="18" font-family="Arial, sans-serif">Shared Treasury Remaining</text>
+  <text x="82" y="242" fill="#86EFAC" font-size="42" font-family="Arial, sans-serif" font-weight="700">$0.44</text>
+  <text x="82" y="266" fill="#9FB2C8" font-size="16" font-family="Arial, sans-serif">Contract-backed treasury after live smoke</text>
+
+  <rect x="378" y="150" width="300" height="126" rx="18" fill="#13243A" stroke="#203652"/>
+  <text x="404" y="190" fill="#9FB2C8" font-size="18" font-family="Arial, sans-serif">Smart Account Mode</text>
+  <text x="404" y="242" fill="#FDE68A" font-size="42" font-family="Arial, sans-serif" font-weight="700">x402-only</text>
+  <text x="404" y="266" fill="#9FB2C8" font-size="16" font-family="Arial, sans-serif">Guarded fallback to stable keypair route</text>
+
+  <rect x="700" y="150" width="300" height="126" rx="18" fill="#13243A" stroke="#203652"/>
+  <text x="726" y="190" fill="#9FB2C8" font-size="18" font-family="Arial, sans-serif">Session Savings</text>
+  <text x="726" y="242" fill="#93C5FD" font-size="42" font-family="Arial, sans-serif" font-weight="700">$0.015</text>
+  <text x="726" y="266" fill="#9FB2C8" font-size="16" font-family="Arial, sans-serif">Saved vs naive x402 in latest smoke run</text>
+
+  <rect x="1022" y="150" width="300" height="126" rx="18" fill="#13243A" stroke="#203652"/>
+  <text x="1048" y="190" fill="#9FB2C8" font-size="18" font-family="Arial, sans-serif">Routes Settled</text>
+  <text x="1048" y="242" fill="#F7FAFC" font-size="42" font-family="Arial, sans-serif" font-weight="700">4 / 4</text>
+  <text x="1048" y="266" fill="#9FB2C8" font-size="16" font-family="Arial, sans-serif">x402, charge, session open, session reuse</text>
+
+  <rect x="56" y="308" width="624" height="260" rx="18" fill="#13243A" stroke="#203652"/>
+  <text x="82" y="350" fill="#F7FAFC" font-size="24" font-family="Arial, sans-serif" font-weight="700">Route Matrix</text>
+  <text x="82" y="382" fill="#9FB2C8" font-size="16" font-family="Arial, sans-serif">Latest verified smoke run</text>
+  <rect x="82" y="410" width="572" height="40" rx="10" fill="#0C1624"/>
+  <text x="104" y="437" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">x402</text>
+  <text x="612" y="437" fill="#86EFAC" font-size="18" font-family="Arial, sans-serif" text-anchor="end">1 call • smart-account</text>
+  <rect x="82" y="460" width="572" height="40" rx="10" fill="#0C1624"/>
+  <text x="104" y="487" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">mpp-charge</text>
+  <text x="612" y="487" fill="#FDE68A" font-size="18" font-family="Arial, sans-serif" text-anchor="end">1 call • keypair fallback</text>
+  <rect x="82" y="510" width="572" height="40" rx="10" fill="#0C1624"/>
+  <text x="104" y="537" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">mpp-session-open</text>
+  <text x="612" y="537" fill="#93C5FD" font-size="18" font-family="Arial, sans-serif" text-anchor="end">1 call • service-sponsored</text>
+  <rect x="82" y="560" width="572" height="40" rx="10" fill="#0C1624"/>
+  <text x="104" y="587" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">mpp-session-reuse</text>
+  <text x="612" y="587" fill="#93C5FD" font-size="18" font-family="Arial, sans-serif" text-anchor="end">1 call • service-sponsored</text>
+
+  <rect x="700" y="308" width="622" height="260" rx="18" fill="#13243A" stroke="#203652"/>
+  <text x="726" y="350" fill="#F7FAFC" font-size="24" font-family="Arial, sans-serif" font-weight="700">Recent Events</text>
+  <text x="726" y="382" fill="#9FB2C8" font-size="16" font-family="Arial, sans-serif">Operator feed with route, policy, and explorer evidence</text>
+  <rect x="726" y="410" width="570" height="40" rx="10" fill="#0C1624"/>
+  <text x="748" y="437" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">research-api • x402</text>
+  <text x="1272" y="437" fill="#86EFAC" font-size="18" font-family="Arial, sans-serif" text-anchor="end">settled • tx proof</text>
+  <rect x="726" y="460" width="570" height="40" rx="10" fill="#0C1624"/>
+  <text x="748" y="487" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">market-api • mpp-charge</text>
+  <text x="1272" y="487" fill="#FDE68A" font-size="18" font-family="Arial, sans-serif" text-anchor="end">settled • agent-funded</text>
+  <rect x="726" y="510" width="570" height="40" rx="10" fill="#0C1624"/>
+  <text x="748" y="537" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">stream-api • mpp-session-open</text>
+  <text x="1272" y="537" fill="#93C5FD" font-size="18" font-family="Arial, sans-serif" text-anchor="end">open • service-sponsored</text>
+  <rect x="726" y="560" width="570" height="40" rx="10" fill="#0C1624"/>
+  <text x="748" y="587" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">stream-api • mpp-session-reuse</text>
+  <text x="1272" y="587" fill="#93C5FD" font-size="18" font-family="Arial, sans-serif" text-anchor="end">reuse • saved 0.005</text>
+
+  <rect x="56" y="600" width="624" height="226" rx="18" fill="#13243A" stroke="#203652"/>
+  <text x="82" y="642" fill="#F7FAFC" font-size="24" font-family="Arial, sans-serif" font-weight="700">Treasury Slices</text>
+  <text x="82" y="676" fill="#9FB2C8" font-size="16" font-family="Arial, sans-serif">One shared wallet, policy-bound agent spend</text>
+  <text x="82" y="724" fill="#F7FAFC" font-size="20" font-family="Arial, sans-serif">research-agent</text>
+  <text x="340" y="724" fill="#86EFAC" font-size="20" font-family="Arial, sans-serif">$0.01 spent / $0.15 daily</text>
+  <text x="82" y="764" fill="#F7FAFC" font-size="20" font-family="Arial, sans-serif">market-agent</text>
+  <text x="340" y="764" fill="#FDE68A" font-size="20" font-family="Arial, sans-serif">$0.05 spent / $0.35 daily</text>
+  <text x="82" y="804" fill="#F7FAFC" font-size="20" font-family="Arial, sans-serif">shared-treasury</text>
+  <text x="340" y="804" fill="#93C5FD" font-size="20" font-family="Arial, sans-serif">$0.00 spent / $0.50 daily</text>
+
+  <rect x="700" y="600" width="622" height="226" rx="18" fill="#13243A" stroke="#203652"/>
+  <text x="726" y="642" fill="#F7FAFC" font-size="24" font-family="Arial, sans-serif" font-weight="700">Judge Notes</text>
+  <text x="726" y="682" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">• Smart-account execution is enabled for x402 only.</text>
+  <text x="726" y="718" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">• MPP charge and session flows stay on explicit keypair execution.</text>
+  <text x="726" y="754" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">• If delegated x402 fails, xMPP falls back instead of surfacing an error.</text>
+  <text x="726" y="790" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">• Contract treasury and session state are visible through operator state.</text>
+</svg>

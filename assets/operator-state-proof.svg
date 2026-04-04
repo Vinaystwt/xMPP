@@ -1,0 +1,31 @@
+<svg width="1200" height="760" viewBox="0 0 1200 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="760" fill="#08111F"/>
+  <rect x="36" y="36" width="1128" height="688" rx="26" fill="#0E1A2B" stroke="#1E314D"/>
+  <text x="64" y="90" fill="#F7FAFC" font-size="34" font-family="Arial, sans-serif" font-weight="700">Operator State Proof</text>
+  <text x="64" y="124" fill="#9FB2C8" font-size="18" font-family="Arial, sans-serif">Contract-backed treasury, policies, sessions, and route evidence from /operator/state</text>
+
+  <rect x="64" y="160" width="516" height="244" rx="18" fill="#13243A" stroke="#203652"/>
+  <text x="90" y="202" fill="#F7FAFC" font-size="24" font-family="Arial, sans-serif" font-weight="700">Treasury</text>
+  <text x="90" y="248" fill="#F7FAFC" font-size="18" font-family="Courier New, monospace">contractTreasury.sharedTreasuryUsd      0.50</text>
+  <text x="90" y="286" fill="#F7FAFC" font-size="18" font-family="Courier New, monospace">contractTreasury.totalSpentUsd          0.06</text>
+  <text x="90" y="324" fill="#F7FAFC" font-size="18" font-family="Courier New, monospace">contractTreasury.remainingUsd           0.44</text>
+  <text x="90" y="362" fill="#F7FAFC" font-size="18" font-family="Courier New, monospace">contractTreasury.paymentCount           4</text>
+
+  <rect x="620" y="160" width="516" height="244" rx="18" fill="#13243A" stroke="#203652"/>
+  <text x="646" y="202" fill="#F7FAFC" font-size="24" font-family="Arial, sans-serif" font-weight="700">Sessions</text>
+  <text x="646" y="248" fill="#F7FAFC" font-size="18" font-family="Courier New, monospace">sessionId: stream-api:http://localhost:4103/stream/tick</text>
+  <text x="646" y="286" fill="#F7FAFC" font-size="18" font-family="Courier New, monospace">status: reused</text>
+  <text x="646" y="324" fill="#F7FAFC" font-size="18" font-family="Courier New, monospace">callCount: 2</text>
+  <text x="646" y="362" fill="#F7FAFC" font-size="18" font-family="Courier New, monospace">lastReceiptId: xmpp_mpp-session-reuse_mnjx2ktt</text>
+
+  <rect x="64" y="436" width="516" height="244" rx="18" fill="#13243A" stroke="#203652"/>
+  <text x="90" y="478" fill="#F7FAFC" font-size="24" font-family="Arial, sans-serif" font-weight="700">Agent Treasury States</text>
+  <text x="90" y="524" fill="#F7FAFC" font-size="18" font-family="Courier New, monospace">research-agent   spent 0.01   lastRoute x402</text>
+  <text x="90" y="562" fill="#F7FAFC" font-size="18" font-family="Courier New, monospace">market-agent     spent 0.05   lastRoute mpp-session-reuse</text>
+
+  <rect x="620" y="436" width="516" height="244" rx="18" fill="#13243A" stroke="#203652"/>
+  <text x="646" y="478" fill="#F7FAFC" font-size="24" font-family="Arial, sans-serif" font-weight="700">Contract Agent Policies</text>
+  <text x="646" y="524" fill="#F7FAFC" font-size="18" font-family="Courier New, monospace">shared-treasury  routes: x402, charge, session</text>
+  <text x="646" y="562" fill="#F7FAFC" font-size="18" font-family="Courier New, monospace">research-agent   routes: x402 only</text>
+  <text x="646" y="600" fill="#F7FAFC" font-size="18" font-family="Courier New, monospace">market-agent     routes: mpp-charge, session</text>
+</svg>
