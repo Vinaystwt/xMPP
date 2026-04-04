@@ -41,6 +41,7 @@
     "xmpp:demo:smoke": "pnpm exec tsx scripts/demo-stack.ts --smoke",
     "xmpp:test": "pnpm check",
     "release:pack": "pnpm build && pnpm exec tsx scripts/pack-public-packages.ts",
+    "release:pack:public": "pnpm build && pnpm exec tsx scripts/pack-scoped-public-packages.ts",
     "release:check": "pnpm check && pnpm release:pack"
   },
   "devDependencies": {

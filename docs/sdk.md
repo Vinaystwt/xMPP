@@ -2,13 +2,13 @@
 
 ## Packages
 
-- `@xmpp/core`
+- `@vinaystwt/xmpp-core`
   - gateway client for `GET /health`, `GET /wallet`, `GET /catalog`, `GET /operator/state`, `GET /policy/preview`, `POST /receipts/verify`, and `POST /fetch`
   - router helpers for preview and workflow estimation
   - shared xMPP type exports for gateway consumers
-- `@xmpp/core/local`
+- `@vinaystwt/xmpp-core/local`
   - in-process `xmppFetch`, metadata extraction, local session listing, and operator-state helpers
-- `@xmpp/mcp`
+- `@vinaystwt/xmpp-mcp`
   - `createXmppMcpServer()` and `runXmppMcpServer()` for stdio MCP integrations
 
 ## CLI
@@ -27,27 +27,27 @@ It generates `XMPP_AGENT_SECRET_KEY`, `FACILITATOR_STELLAR_PRIVATE_KEY`, and `MP
 Use the workspace release check to build and pack the public package family into `.release/`:
 
 ```bash
-pnpm release:pack
+pnpm release:pack:public
 ```
 
-That flow currently verifies these packages locally:
+That flow stages these public package names:
 
-- `@xmpp/types`
-- `@xmpp/logger`
-- `@xmpp/config`
-- `@xmpp/router`
-- `@xmpp/contract-runtime`
-- `@xmpp/wallet`
-- `@xmpp/payment-adapters`
-- `@xmpp/policy-engine`
-- `@xmpp/http-interceptor`
-- `@xmpp/core`
-- `@xmpp/mcp`
+- `@vinaystwt/xmpp-types`
+- `@vinaystwt/xmpp-logger`
+- `@vinaystwt/xmpp-config`
+- `@vinaystwt/xmpp-router`
+- `@vinaystwt/xmpp-contract-runtime`
+- `@vinaystwt/xmpp-wallet`
+- `@vinaystwt/xmpp-payment-adapters`
+- `@vinaystwt/xmpp-policy-engine`
+- `@vinaystwt/xmpp-http-interceptor`
+- `@vinaystwt/xmpp-core`
+- `@vinaystwt/xmpp-mcp`
 
 ## Example
 
 ```ts
-import { XmppGatewayClient } from '@xmpp/core'
+import { XmppGatewayClient } from '@vinaystwt/xmpp-core'
 
 const client = new XmppGatewayClient({ baseUrl: 'http://localhost:4300' })
 const result = await client.fetch('http://localhost:4101/research?q=stellar', {

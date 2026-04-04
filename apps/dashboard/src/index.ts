@@ -2,7 +2,6 @@ import express from 'express'
 import { existsSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { config } from '@xmpp/config'
 
 const moduleDir = dirname(fileURLToPath(import.meta.url))
 const repoRoot = resolve(moduleDir, '../../../')
@@ -11,7 +10,15 @@ const assetDir = [
   resolve(moduleDir, '../../assets'),
   resolve(moduleDir, '../assets'),
 ].find((candidate) => existsSync(candidate))
-const gatewayBaseUrl = config.dashboardGatewayUrl?.trim() || `http://localhost:${config.gatewayPort}`
+const dashboardPort = Number(process.env.XMPP_DASHBOARD_PORT ?? 4310)
+const gatewayPort = Number(process.env.XMPP_GATEWAY_PORT ?? 4300)
+const gatewayBaseUrl =
+  process.env.XMPP_DASHBOARD_GATEWAY_URL?.trim() || `http://localhost:${gatewayPort}`
+const serviceUrls = {
+  research: process.env.XMPP_RESEARCH_API_URL ?? 'http://localhost:4101',
+  market: process.env.XMPP_MARKET_API_URL ?? 'http://localhost:4102',
+  stream: process.env.XMPP_STREAM_API_URL ?? 'http://localhost:4103',
+}
 
 export function createDashboardApp() {
   const app = express()
@@ -549,15 +556,15 @@ function renderDashboardHtml() {
               </article>
               <article class="service-card">
                 <h3>Research API</h3>
-                <div class="service-tag mono">${config.services.research}</div>
+                <div class="service-tag mono">${serviceUrls.research}</div>
               </article>
               <article class="service-card">
                 <h3>Market API</h3>
-                <div class="service-tag mono">${config.services.market}</div>
+                <div class="service-tag mono">${serviceUrls.market}</div>
               </article>
               <article class="service-card">
                 <h3>Stream API</h3>
-                <div class="service-tag mono">${config.services.stream}</div>
+                <div class="service-tag mono">${serviceUrls.stream}</div>
               </article>
             </div>
           </section>
@@ -568,7 +575,12 @@ function renderDashboardHtml() {
     <script type="module">
       const defaultGatewayBaseUrl = ${JSON.stringify(gatewayBaseUrl)};
       const queryGatewayBaseUrl = new URL(window.location.href).searchParams.get('gateway');
-      const gatewayBaseUrl = (queryGatewayBaseUrl && queryGatewayBaseUrl.trim()) || defaultGatewayBaseUrl;
+      const localDefaultGateway = /^https?:\\/\\/(localhost|127\\.0\\.0\\.1)(:\\d+)?$/i.test(defaultGatewayBaseUrl);
+      const gatewayBaseUrl =
+        (queryGatewayBaseUrl && queryGatewayBaseUrl.trim()) ||
+        (!localDefaultGateway || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+          ? defaultGatewayBaseUrl
+          : '');
       const currency = new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
@@ -793,6 +805,17 @@ function renderDashboardHtml() {
 
       async function refresh() {
         try {
+          if (!gatewayBaseUrl) {
+            document.getElementById('gateway-status').textContent = 'Configure';
+            document.getElementById('gateway-copy').textContent =
+              'Set XMPP_DASHBOARD_GATEWAY_URL or open this dashboard with ?gateway=https://your-gateway.example.com';
+            document.getElementById('event-feed').innerHTML =
+              '<div class="empty">Hosted dashboard is ready, but it needs a reachable xMPP gateway URL.</div>';
+            document.getElementById('last-updated').textContent =
+              'Waiting for a hosted gateway URL.';
+            return;
+          }
+
           const [health, wallet, state, catalog, policyPreview] = await Promise.all([
             fetch(gatewayBaseUrl + '/health').then((response) => response.json()),
             fetch(gatewayBaseUrl + '/wallet').then((response) => response.json()),
@@ -848,8 +871,8 @@ function renderDashboardHtml() {
 const app = createDashboardApp()
 
 if (!process.env.VERCEL) {
-  app.listen(config.dashboardPort, () => {
-    console.log(`[xMPP] dashboard listening on :${config.dashboardPort}`)
+  app.listen(dashboardPort, () => {
+    console.log(`[xMPP] dashboard listening on :${dashboardPort}`)
   })
 }
 

@@ -1,4 +1,4 @@
-import { XmppGatewayClient } from '@xmpp/core'
+import { XmppGatewayClient } from '@vinaystwt/xmpp-core'
 
 const client = new XmppGatewayClient({ baseUrl: 'http://localhost:4300' })
 

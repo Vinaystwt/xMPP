@@ -9,3 +9,5 @@ coverage
 target
 .DS_Store
 test_snapshots
+
+.release-public

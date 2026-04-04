@@ -10,7 +10,6 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@xmpp/config": "workspace:*",
     "express": "^5.2.1"
   },
   "devDependencies": {

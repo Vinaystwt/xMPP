@@ -282,20 +282,30 @@ See [agent-flow.md](./docs/agent-flow.md) for the canonical sequence.
 
 ## Installable Packages
 
-Build the package surfaces locally:
+The workspace package names stay under `@xmpp/*` inside the repo.
+
+The public npm release family is staged under `@vinaystwt/*` so it can be published from the current npm account.
+
+Build the local workspace package surfaces:
 
 ```bash
 pnpm --filter @xmpp/core build
 pnpm --filter @xmpp/mcp build
 ```
 
+Build the scoped public release tarballs:
+
+```bash
+pnpm release:pack:public
+```
+
 Intended package entrypoints:
 
-- `@xmpp/core`
+- `@vinaystwt/xmpp-core`
   - gateway client, router helpers, and type exports
-- `@xmpp/core/local`
+- `@vinaystwt/xmpp-core/local`
   - in-process `xmppFetch` and operator-state helpers
-- `@xmpp/mcp`
+- `@vinaystwt/xmpp-mcp`
   - MCP server factory for stdio agent integrations
 - `xmpp-demo bootstrap`
   - SDK CLI for generating and funding testnet identities into a local `.env.local`
