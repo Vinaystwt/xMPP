@@ -1,26 +1,35 @@
 import express from 'express'
+import { existsSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { config } from '@xmpp/config'
 
-const app = express()
-const gatewayBaseUrl = config.dashboardGatewayUrl?.trim() || `http://localhost:${config.gatewayPort}`
 const moduleDir = dirname(fileURLToPath(import.meta.url))
 const repoRoot = resolve(moduleDir, '../../../')
+const assetDir = [
+  resolve(repoRoot, 'assets'),
+  resolve(moduleDir, '../../assets'),
+  resolve(moduleDir, '../assets'),
+].find((candidate) => existsSync(candidate))
+const gatewayBaseUrl = config.dashboardGatewayUrl?.trim() || `http://localhost:${config.gatewayPort}`
 
-app.use('/assets', express.static(resolve(repoRoot, 'assets')))
+export function createDashboardApp() {
+  const app = express()
 
-app.get('/health', (_req, res) => {
-  res.json({ ok: true, service: 'xmpp-dashboard' })
-})
+  if (assetDir) {
+    app.use('/assets', express.static(assetDir))
+  }
 
-app.get('/', (_req, res) => {
-  res.type('html').send(renderDashboardHtml())
-})
+  app.get('/health', (_req, res) => {
+    res.json({ ok: true, service: 'xmpp-dashboard' })
+  })
 
-app.listen(config.dashboardPort, () => {
-  console.log(`[xMPP] dashboard listening on :${config.dashboardPort}`)
-})
+  app.get('/', (_req, res) => {
+    res.type('html').send(renderDashboardHtml())
+  })
+
+  return app
+}
 
 function renderDashboardHtml() {
   return `<!doctype html>
@@ -835,3 +844,13 @@ function renderDashboardHtml() {
   </body>
 </html>`
 }
+
+const app = createDashboardApp()
+
+if (!process.env.VERCEL) {
+  app.listen(config.dashboardPort, () => {
+    console.log(`[xMPP] dashboard listening on :${config.dashboardPort}`)
+  })
+}
+
+export default app

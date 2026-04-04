@@ -352,6 +352,7 @@ That means xMPP already shows smart-account-aware settlement, but it does not ye
 - [router-algorithm.md](./docs/router-algorithm.md)
 - [route-economics.md](./docs/route-economics.md)
 - [agent-flow.md](./docs/agent-flow.md)
+- [deployment.md](./docs/deployment.md)
 - [demo-script.md](./docs/demo-script.md)
 - [threat-model.md](./docs/threat-model.md)
 - [PROTOCOL.md](./docs/PROTOCOL.md)
