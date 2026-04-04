@@ -1,9 +1,9 @@
 import './globals.css'
-import type { Metadata } from 'next'
 
-export const metadata: Metadata = {
-  title: 'xMPP Frontend Lab',
-  description: 'Isolated frontend build surfaces for xMPP.',
+export const metadata = {
+  title: 'xMPP',
+  description:
+    'The payment routing brain for autonomous agents on Stellar. x402 + MPP routing, operator policy control, and contract-backed treasury.',
   icons: {
     icon: '/favicon.svg',
   },
