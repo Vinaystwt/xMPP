@@ -8,7 +8,7 @@
   <text x="102" y="312" fill="#9FB2C8" font-size="18" font-family="Arial, sans-serif">Normal HTTP request</text>
 
   <rect x="394" y="214" width="320" height="220" rx="24" fill="#13243A" stroke="#203652"/>
-  <text x="424" y="270" fill="#F7FAFC" font-size="28" font-family="Arial, sans-serif" font-weight="700">xMPP Gateway / Interceptor</text>
+  <text x="424" y="270" fill="#F7FAFC" font-size="28" font-family="Arial, sans-serif" font-weight="700">xMPP Gateway</text>
   <text x="424" y="316" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">1. intercept `402 Payment Required`</text>
   <text x="424" y="352" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">2. score routes and estimate workflow</text>
   <text x="424" y="388" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">3. enforce policy and budget</text>

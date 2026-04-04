@@ -25,26 +25,26 @@
   <text x="512" y="368" fill="#F7FAFC" font-size="20" font-family="Arial, sans-serif">2 in latest smoke</text>
   <text x="432" y="470" fill="#9FB2C8" font-size="18" font-family="Arial, sans-serif">Later calls skip the open cost and keep the channel lifecycle amortized.</text>
 
-  <rect x="736" y="180" width="280" height="420" rx="24" fill="#13243A" stroke="#203652"/>
+  <rect x="736" y="180" width="312" height="420" rx="24" fill="#13243A" stroke="#203652"/>
   <text x="768" y="232" fill="#86EFAC" font-size="26" font-family="Arial, sans-serif" font-weight="700">3. On-Chain Evidence</text>
   <text x="768" y="290" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">Session registry contract</text>
-  <text x="768" y="328" fill="#F7FAFC" font-size="18" font-family="Courier New, monospace">CB752H5GUT22HDGPRLIVTYHSG6SPW2RIT6OXNQ7BBBXIBBUVIYVVA7RL</text>
+  <text x="768" y="328" fill="#F7FAFC" font-size="18" font-family="Courier New, monospace">CB752H5GUT22HDGP...BBXIBBUVIYVVA7RL</text>
   <text x="768" y="384" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">Operator state exposes:</text>
   <text x="768" y="420" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">• session id</text>
   <text x="768" y="452" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">• open/reuse status</text>
   <text x="768" y="484" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">• call count</text>
   <text x="768" y="516" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">• latest receipt id</text>
 
-  <rect x="1072" y="180" width="264" height="420" rx="24" fill="#13243A" stroke="#203652"/>
+  <rect x="1080" y="180" width="256" height="420" rx="24" fill="#13243A" stroke="#203652"/>
   <text x="1104" y="232" fill="#FDE68A" font-size="26" font-family="Arial, sans-serif" font-weight="700">4. Savings</text>
   <text x="1104" y="300" fill="#F7FAFC" font-size="20" font-family="Arial, sans-serif">Naive x402 for 2 calls:</text>
   <text x="1104" y="338" fill="#F7FAFC" font-size="20" font-family="Arial, sans-serif">$0.020</text>
   <text x="1104" y="394" fill="#F7FAFC" font-size="20" font-family="Arial, sans-serif">Actual MPP session cost:</text>
   <text x="1104" y="432" fill="#F7FAFC" font-size="20" font-family="Arial, sans-serif">$0.015</text>
   <text x="1104" y="488" fill="#86EFAC" font-size="28" font-family="Arial, sans-serif" font-weight="700">Saved: $0.005</text>
-  <text x="1104" y="544" fill="#9FB2C8" font-size="18" font-family="Arial, sans-serif">This savings is already visible in the live operator state.</text>
+  <text x="1104" y="544" fill="#9FB2C8" font-size="18" font-family="Arial, sans-serif">Already visible in live operator state.</text>
 
   <path d="M344 390H400" stroke="#39577C" stroke-width="8" stroke-linecap="round"/>
   <path d="M680 390H736" stroke="#39577C" stroke-width="8" stroke-linecap="round"/>
-  <path d="M1016 390H1072" stroke="#39577C" stroke-width="8" stroke-linecap="round"/>
+  <path d="M1048 390H1080" stroke="#39577C" stroke-width="8" stroke-linecap="round"/>
 </svg>
