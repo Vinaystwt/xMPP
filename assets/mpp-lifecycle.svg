@@ -25,7 +25,6 @@
   <rect x="736" y="180" width="312" height="420" rx="24" fill="#13243A" stroke="#203652"/>
   <text x="768" y="232" fill="#86EFAC" font-size="26" font-family="Arial, sans-serif" font-weight="700">3. On-Chain Evidence</text>
   <text x="768" y="290" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">Session registry contract</text>
-  <text x="768" y="328" fill="#F7FAFC" font-size="18" font-family="Courier New, monospace">CB752H5GUT22HDGP...BBXIBBUVIYVVA7RL</text>
   <text x="768" y="384" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">Operator state exposes:</text>
   <text x="768" y="420" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">• session id</text>
   <text x="768" y="452" fill="#F7FAFC" font-size="18" font-family="Arial, sans-serif">• open/reuse status</text>
@@ -39,7 +38,6 @@
   <text x="1104" y="394" fill="#F7FAFC" font-size="20" font-family="Arial, sans-serif">Actual MPP session cost:</text>
   <text x="1104" y="432" fill="#F7FAFC" font-size="20" font-family="Arial, sans-serif">$0.015</text>
   <text x="1104" y="488" fill="#86EFAC" font-size="28" font-family="Arial, sans-serif" font-weight="700">Saved: $0.005</text>
-  <text x="1104" y="544" fill="#9FB2C8" font-size="18" font-family="Arial, sans-serif">Already visible in live operator state.</text>
 
   <path d="M344 390H400" stroke="#39577C" stroke-width="8" stroke-linecap="round"/>
   <path d="M680 390H736" stroke="#39577C" stroke-width="8" stroke-linecap="round"/>
